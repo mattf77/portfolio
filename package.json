@@ -5,12 +5,15 @@
   "homepage": "https://mattf77.github.io/portfolio",
   "type": "module",
   "scripts": {
-  "dev": "vite",
-  "build": "vite build",
-  "preview": "vite preview",
-  "deploy": "gh-pages -d dist"
-},
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "deploy": "gh-pages -d dist"
+  },
   "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@mantine/core": "^8.3.12",
+    "@mantine/hooks": "^8.3.12",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
   },
