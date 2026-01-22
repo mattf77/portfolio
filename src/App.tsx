@@ -2,6 +2,13 @@ import React, { useState } from "react";
 import { Flex, Group, Button, Image } from "@mantine/core";
 import { Win2kClock } from "./components/Win2kClock";
 
+import ieLogo from "/ielogo.png";
+import emailLogo from "/emailicon.webp";
+import explorerLogo from "/explorericon.svg";
+import notepadLogo from "/notepadlogo.webp";
+import startIcon from "/starticon3.png";
+
+
 /* ------------------ WINDOWS 2000 DIVIDER ------------------ */
 
 function Win2kDivider() {
@@ -92,18 +99,18 @@ export default function App() {
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
-            width: 50,
+            width: 70,
             cursor: "default",
             userSelect: "none",
           }}
         >
           <img
-            src="/ielogo.png"
+            src={ieLogo}
             alt=""
             draggable={false}
             onDragStart={(e) => e.preventDefault()}
             style={{
-              width: 48,
+              width: 70,
               height: "auto",
               imageRendering: "pixelated",
               marginBottom: 4,
@@ -177,7 +184,7 @@ export default function App() {
             }}
           >
             <Image
-              src="/starticon3.png"
+              src={startIcon}
               alt=""
               style={{
                 width: 24,
@@ -192,10 +199,10 @@ export default function App() {
           <Win2kDivider />
 
           {/* Quick Launch */}
-          <Group gap={2}>
+          <Group gap={6}>
   {/* 1st icon — Internet Explorer */}
   <Image
-    src="/ielogo.png"
+    src={ieLogo}
     alt="IE"
     style={{
       width: 20,
@@ -207,7 +214,7 @@ export default function App() {
 
   {/* 2nd icon — Email */}
   <Image
-    src="/emailicon.webp"
+    src={emailLogo}
     alt="Email"
     style={{
       width: 20,
@@ -219,7 +226,7 @@ export default function App() {
 
   {/* 3rd icon — Explorer */}
   <Image
-    src="/explorericon.svg"
+    src={explorerLogo}
     alt="Explorer"
     style={{
       width: 20,
@@ -231,7 +238,7 @@ export default function App() {
 
   {/* 4th icon — Notepad */}
   <Image
-    src="/notepadlogo.webp"
+    src={notepadLogo}
     alt="Notepad"
     style={{
       width: 20,
@@ -284,7 +291,7 @@ export default function App() {
 >
   {/* IE icon inside the taskbar button */}
   <img
-    src="/ielogo.png"
+    src={ieLogo}
     alt=""
     draggable={false}
     onDragStart={(e) => e.preventDefault()}

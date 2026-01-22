@@ -46,7 +46,7 @@ export function Win2kClock() {
       }}
     >
         {/* Quick Launch: 3 empty icons */}
-                  <Group gap={2}>
+                  <Group gap={2} mr="10px">
             {[1, 2].map((i) => (
               <Image
                 key={i}
