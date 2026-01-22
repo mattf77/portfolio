@@ -7,6 +7,7 @@ import emailLogo from "/emailicon.webp";
 import explorerLogo from "/explorericon.svg";
 import notepadLogo from "/notepadlogo.webp";
 import startIcon from "/starticon3.png";
+import windowsWallpaper from "/windowsbg.jpg"
 
 
 /* ------------------ WINDOWS 2000 DIVIDER ------------------ */
@@ -22,7 +23,7 @@ function Win2kDivider() {
       }}
     >
       <div style={{ width: 1, backgroundColor: "#DFDFDF" }} />
-      <div style={{ width: 1, backgroundColor: "#808080" }} />
+      <div style={{ width: 1, backgroundColor: "#316AC5" }} />
     </div>
   );
 }
@@ -79,8 +80,11 @@ export default function App() {
         style={{
           flex: 1,
           padding: "16px",
-          backgroundColor: "#3A6EA5",
+          backgroundImage: `url(${windowsWallpaper})`,
           position: "relative",
+          backgroundPosition: "center",
+          backgroundSize: "140%"
+
         }}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
@@ -150,11 +154,11 @@ export default function App() {
         align="center"
         style={{
           height: "32px",
-          backgroundColor: "#C0C0C0",
+          backgroundColor: "#245EDC",
           padding: "0 3px",
           boxSizing: "border-box",
-          borderTop: "1px solid #FFFFFF",
-          borderBottom: "1px solid #404040",
+          borderTop: "1px solid #4A7BD0",
+          borderBottom: "1px solid #1A3F8F",
           boxShadow: `
             inset 0 1px 0 #DFDFDF,
             inset 0 -1px 0 #808080
@@ -170,17 +174,19 @@ export default function App() {
             px={6}
             style={{
               display: "flex",
+              color: "white",
               alignItems: "center",
               gap: "4px",
-              backgroundColor: "#C0C0C0",
+              backgroundColor: "#3CB043",
               borderTop: "1px solid #FFFFFF",
               borderLeft: "1px solid #FFFFFF",
-              borderRight: "1px solid #808080",
-              borderBottom: "1px solid #808080",
+              borderRight: "1px solid #2A7A32",
+              borderBottom: "1px solid #2A7A32",
               boxShadow:
                 "inset 1px 1px 0 #DFDFDF, inset -1px -1px 0 #404040",
               borderRadius: 0,
-              cursor: "default",   
+              cursor: "default", 
+              letterSpacing: '1px',
             }}
           >
             <Image
@@ -260,8 +266,8 @@ export default function App() {
   h={26}
   styles={{
   root: {
-    backgroundColor: "#E0E0E0",
-    color: "#000",
+    backgroundColor: "#316AC5",
+    color: "#FFFFFF",
     fontFamily: "Tahoma, sans-serif",
     fontSize: "12px",
 
@@ -270,13 +276,13 @@ export default function App() {
     boxSizing: "border-box",
     borderRadius: 0,
 
-    borderTop: "1px solid #404040",
-    borderLeft: "1px solid #404040",
-    borderRight: "1px solid #FFFFFF",
-    borderBottom: "1px solid #FFFFFF",
+    borderTop: "1px solid #1A3F8F",
+    borderLeft: "1px solid #1A3F8F",
+    borderRight: "1px solid #4A7BD0",
+    borderBottom: "1px solid #4A7BD0",
 
     boxShadow: `
-      inset 1px 1px 0 #808080,
+      inset 1px 1px 0 #1A3F8F,
       inset -1px -1px 0 #DFDFDF
     `,
 

@@ -1,6 +1,8 @@
 import { Flex, Group, Image } from "@mantine/core";
 import { useState, useEffect } from "react";
 
+import audioIcon from "/soundIcon5.png";
+
 export function Win2kClock() {
   const [time, setTime] = useState("");
 
@@ -27,39 +29,37 @@ export function Win2kClock() {
         height: 26,
         minWidth: 60,
         padding: "0 6px",
-        backgroundColor: "#C0C0C0",
+        backgroundColor: "#245EDC",
         fontSize: "12px",
         fontFamily: "Tahoma, sans-serif",
-        color: "#000",
+        color: "#FFFFFF",
         userSelect: "none",
 
         // Sunken bevel
-        borderTop: "1px solid #808080",
-        borderLeft: "1px solid #808080",
-        borderRight: "1px solid #FFFFFF",
-        borderBottom: "1px solid #FFFFFF",
+        borderTop: "1px solid #1A3F8F",
+        borderLeft: "1px solid #1A3F8F",
+        borderRight: "1px solid #4A7BD0",
+        borderBottom: "1px solid #4A7BD0",
 
         boxShadow: `
-          inset 1px 1px 0 #404040,
+          inset 1px 1px 0 #1A3F8F,
           inset -1px -1px 0 #DFDFDF
         `,
       }}
     >
         {/* Quick Launch: 3 empty icons */}
                   <Group gap={2} mr="10px">
-            {[1, 2].map((i) => (
-              <Image
-                key={i}
-                src={""}
-                w={20}
-                style={{
-                  backgroundColor: "#D4D0C8",
-                  width: 20,
-                  height: 20,
-                }}
-              />
-            ))}
-          </Group>
+
+  <Image
+    src={audioIcon}
+    alt="Audio"
+    style={{
+      height: 16,
+      imageRendering: "pixelated",
+      display: "block",
+    }}
+  />
+</Group>
       {time}
     </Flex>
   );
