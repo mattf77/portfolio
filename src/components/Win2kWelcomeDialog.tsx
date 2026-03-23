@@ -152,8 +152,7 @@ export function Win2kWelcomeDialog({ onClose }: Props) {
             }}
           >
             Welcome to Matthew's Portfolio. Here you can view Matthew's recent
-            projects, Matthew's resume, as well as other information. Browse
-            the desktop shortcuts to view this information.
+            projects, Matthew's resume, as well as other information.
           </p>
         </div>
 

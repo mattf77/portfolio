@@ -174,6 +174,23 @@ export default function App() {
     }
   };
 
+  // During rubber-band, compute live icon hits so icons highlight as the rect overlaps them
+  const liveSelected: Set<string> = rubberBand
+    ? (() => {
+        const minX = Math.min(rubberBand.x1, rubberBand.x2);
+        const maxX = Math.max(rubberBand.x1, rubberBand.x2);
+        const minY = Math.min(rubberBand.y1, rubberBand.y2);
+        const maxY = Math.max(rubberBand.y1, rubberBand.y2);
+        const live = new Set<string>();
+        Object.entries(iconPositions).forEach(([iconId, pos]) => {
+          if (pos.x < maxX && pos.x + 48 > minX && pos.y < maxY && pos.y + 72 > minY) {
+            live.add(iconId);
+          }
+        });
+        return live;
+      })()
+    : selectedIcons;
+
   return (
     <Flex
       direction="column"
@@ -203,7 +220,7 @@ export default function App() {
         {/* Desktop Icons */}
         {ICON_DEFS.map(({ id, src, label }) => {
           const pos = iconPositions[id];
-          const isSelected = selectedIcons.has(id);
+          const isSelected = liveSelected.has(id);
           const onDoubleClick =
             id === "resume"
               ? () => { setResumeWindowOpen(true); setResumeWindowMinimized(false); bringToFront("resume"); }
