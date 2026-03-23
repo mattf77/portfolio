@@ -143,10 +143,9 @@ export function Win2kStartMenu({ onClose, onRun, onOpenWord, onOpenExplorer, onO
   // Close on click outside
   useEffect(() => {
     const handler = (e: MouseEvent) => {
-      if (
-        ref.current && !ref.current.contains(e.target as Node) &&
-        submenuRef.current && !submenuRef.current.contains(e.target as Node)
-      ) {
+      const insideMain = ref.current?.contains(e.target as Node);
+      const insideSubmenu = submenuRef.current?.contains(e.target as Node);
+      if (!insideMain && !insideSubmenu) {
         onClose();
       }
     };
