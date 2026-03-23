@@ -87,19 +87,24 @@ export function Win2kFolderWindow({
   const isResizing = useRef(false);
   const dragOffset = useRef({ x: 0, y: 0 });
   const resizeStart = useRef({ x: 0, y: 0, w: 0, h: 0 });
+  const posRef = useRef(pos);
+  const sizeRef = useRef(size);
+
+  const updatePos = (p: { x: number; y: number }) => { posRef.current = p; setPos(p); };
+  const updateSize = (s: { width: number; height: number }) => { sizeRef.current = s; setSize(s); };
 
   useEffect(() => {
     const onMouseMove = (e: MouseEvent) => {
       if (isDragging.current) {
-        setPos({
-          x: e.clientX - dragOffset.current.x,
-          y: e.clientY - dragOffset.current.y,
+        updatePos({
+          x: Math.max(0, Math.min(e.clientX - dragOffset.current.x, window.innerWidth - sizeRef.current.width)),
+          y: Math.max(0, Math.min(e.clientY - dragOffset.current.y, window.innerHeight - TASKBAR_H - sizeRef.current.height)),
         });
       }
       if (isResizing.current) {
-        setSize({
-          width: Math.max(320, resizeStart.current.w + e.clientX - resizeStart.current.x),
-          height: Math.max(220, resizeStart.current.h + e.clientY - resizeStart.current.y),
+        updateSize({
+          width: Math.min(Math.max(320, resizeStart.current.w + e.clientX - resizeStart.current.x), window.innerWidth - posRef.current.x),
+          height: Math.min(Math.max(220, resizeStart.current.h + e.clientY - resizeStart.current.y), window.innerHeight - TASKBAR_H - posRef.current.y),
         });
       }
     };
