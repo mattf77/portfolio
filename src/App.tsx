@@ -164,7 +164,7 @@ export default function App() {
             e.stopPropagation();
             handleResumeMouseDown(e);
           }}
-          onClick={() => { setResumeWindowOpen(true); bringToFront("resume"); }}
+          onDoubleClick={() => { setResumeWindowOpen(true); bringToFront("resume"); }}
           style={{
             position: "absolute",
             top: resumePos.y,
@@ -217,7 +217,7 @@ export default function App() {
             e.stopPropagation();
             handleProjectsMouseDown(e);
           }}
-          onClick={() => { setProjectsWindowOpen(true); bringToFront("projects"); }}
+          onDoubleClick={() => { setProjectsWindowOpen(true); bringToFront("projects"); }}
           style={{
             position: "absolute",
             top: projectsPos.y,
@@ -267,7 +267,7 @@ export default function App() {
         {/* AboutMe Desktop Icon */}
         <div
           onMouseDown={(e) => { e.stopPropagation(); handleAboutmeMouseDown(e); }}
-          onClick={() => { setAboutmeWindowOpen(true); bringToFront("aboutme"); }}
+          onDoubleClick={() => { setAboutmeWindowOpen(true); bringToFront("aboutme"); }}
           style={{
             position: "absolute",
             top: aboutmePos.y,
