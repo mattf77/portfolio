@@ -39,7 +39,7 @@ function Win2kDivider() {
 
 const ICON_DEFS = [
   { id: "resume",   src: wordIcon,    label: "Resume" },
-  { id: "projects", src: folderIcon,  label: "Projects" },
+  { id: "projects", src: folderIcon,  label: "Transperfect Projects" },
   { id: "aboutme",  src: notepadIcon, label: "AboutMe.txt" },
 ];
 
