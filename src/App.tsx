@@ -262,7 +262,7 @@ export default function App() {
         align="center"
         style={{
           height: "32px",
-          minHeight: "3.5vh",
+          minHeight: "4vh",
           backgroundColor: "#245EDC",
           padding: "0 3px",
           boxSizing: "border-box",
