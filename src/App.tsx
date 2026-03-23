@@ -417,8 +417,8 @@ export default function App() {
           <Group gap={6}>
             <Image src={ieLogo} alt="IE" style={{ width: 20, height: 20, imageRendering: "pixelated", display: "block" }} />
             <Image src={emailLogo} alt="Email" style={{ width: 20, height: 20, imageRendering: "pixelated", display: "block" }} />
-            <Image src={explorerLogo} alt="Explorer" style={{ width: 20, height: 20, imageRendering: "pixelated", display: "block" }} />
-            <Image src={notepadLogo} alt="Notepad" style={{ width: 20, height: 20, imageRendering: "pixelated", display: "block" }} />
+            <Image src={folderIcon} alt="Explorer" style={{ width: 20, height: 20, imageRendering: "pixelated", display: "block" }} />
+            <Image src={notepadIcon} alt="Notepad" style={{ width: 20, height: 20, imageRendering: "pixelated", display: "block" }} />
           </Group>
 
           <Win2kDivider />
