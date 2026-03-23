@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Flex, Group, Button, Image } from "@mantine/core";
 import { Win2kClock } from "./components/Win2kClock";
+import { Win2kFolderWindow } from "./components/Win2kFolderWindow";
 
 import ieLogo from "/ielogo.png";
 import emailLogo from "/emailicon.webp";
@@ -8,6 +9,8 @@ import explorerLogo from "/explorericon.svg";
 import notepadLogo from "/notepadlogo.webp";
 import startIcon from "/starticon3.png";
 import windowsWallpaper from "/windowsxpultrawide.jpg"
+import folderIcon from "/folder_icon.png"
+import wordIcon from "/word_icon_3.png"
 
 
 /* ------------------ WINDOWS 2000 DIVIDER ------------------ */
@@ -31,37 +34,61 @@ function Win2kDivider() {
 /* ------------------ APP ------------------ */
 
 export default function App() {
-  // Desktop icon position
-  const [iconPos, setIconPos] = useState({ x: 16, y: 16 });
+  // Desktop icon positions
+  const [resumePos, setResumePos] = useState({ x: 16, y: 16 });
 
   // Dragging + selection state
-  const [dragging, setDragging] = useState(false);
-  const [selected, setSelected] = useState(false);
-  const [offset, setOffset] = useState({ x: 0, y: 0 });
+  const [resumeDragging, setResumeDragging] = useState(false);
+  const [resumeSelected, setResumeSelected] = useState(false);
+  const [resumeOffset, setResumeOffset] = useState({ x: 0, y: 0 });
 
-  const handleMouseDown = (e: React.MouseEvent) => {
-    setSelected(true);
-    setDragging(true);
-    setOffset({
-      x: e.clientX - iconPos.x,
-      y: e.clientY - iconPos.y,
+  const [projectsPos, setProjectsPos] = useState({ x: 16, y: 114 });
+  const [projectsDragging, setProjectsDragging] = useState(false);
+  const [projectsSelected, setProjectsSelected] = useState(false);
+  const [projectsOffset, setProjectsOffset] = useState({ x: 0, y: 0 });
+  const [projectsWindowOpen, setProjectsWindowOpen] = useState(false);
+
+  const handleResumeMouseDown = (e: React.MouseEvent) => {
+    setResumeSelected(true);
+    setResumeDragging(true);
+    setResumeOffset({
+      x: e.clientX - resumePos.x,
+      y: e.clientY - resumePos.y,
+    });
+  };
+
+  const handleProjectsMouseDown = (e: React.MouseEvent) => {
+    setProjectsSelected(true);
+    setProjectsDragging(true);
+    setProjectsOffset({
+      x: e.clientX - projectsPos.x,
+      y: e.clientY - projectsPos.y,
     });
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
-    if (!dragging) return;
-    setIconPos({
-      x: e.clientX - offset.x,
-      y: e.clientY - offset.y,
-    });
+    if (resumeDragging) {
+      setResumePos({
+        x: e.clientX - resumeOffset.x,
+        y: e.clientY - resumeOffset.y,
+      });
+    }
+    if (projectsDragging) {
+      setProjectsPos({
+        x: e.clientX - projectsOffset.x,
+        y: e.clientY - projectsOffset.y,
+      });
+    }
   };
 
   const handleMouseUp = () => {
-    setDragging(false);
+    setResumeDragging(false);
+    setProjectsDragging(false);
   };
 
   const handleDesktopClick = () => {
-    if (!dragging) setSelected(false);
+    if (!resumeDragging) setResumeSelected(false);
+    if (!projectsDragging) setProjectsSelected(false);
   };
 
   return (
@@ -92,16 +119,16 @@ export default function App() {
         onMouseUp={handleMouseUp}
         onMouseDown={handleDesktopClick}
       >
-        {/* Draggable Desktop Icon */}
+        {/* Resume Desktop Icon */}
         <div
           onMouseDown={(e) => {
             e.stopPropagation();
-            handleMouseDown(e);
+            handleResumeMouseDown(e);
           }}
           style={{
             position: "absolute",
-            top: iconPos.y,
-            left: iconPos.x,
+            top: resumePos.y,
+            left: resumePos.x,
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
@@ -111,7 +138,7 @@ export default function App() {
           }}
         >
           <img
-            src={ieLogo}
+            src={wordIcon}
             alt=""
             draggable={false}
             onDragStart={(e) => e.preventDefault()}
@@ -122,8 +149,6 @@ export default function App() {
               marginBottom: 4,
             }}
           />
-
-          {/* Win2k-style selection highlight */}
           <span
             style={{
               color: "white",
@@ -131,24 +156,80 @@ export default function App() {
               fontFamily: "Tahoma, sans-serif",
               fontWeight: "lighter",
               textAlign: "center",
-
               display: "inline-block",
               whiteSpace: "normal",
               width: "fit-content",
-
-              padding: selected ? "1px 2px" : "0px",
-              backgroundColor: selected ? "#0A246A" : "transparent",
+              padding: resumeSelected ? "1px 2px" : "0px",
+              backgroundColor: resumeSelected ? "#0A246A" : "transparent",
               borderRadius: 2,
-
-              textShadow: selected ? "none" : "1px 1px 2px #000",
-
+              textShadow: resumeSelected ? "none" : "1px 1px 2px #000",
               letterSpacing: "1px",
               lineHeight: "16px",
             }}
           >
-            Internet Explorer
+            Resume
           </span>
         </div>
+
+        {/* Projects Desktop Icon */}
+        <div
+          onMouseDown={(e) => {
+            e.stopPropagation();
+            handleProjectsMouseDown(e);
+          }}
+          onClick={() => setProjectsWindowOpen(true)}
+          style={{
+            position: "absolute",
+            top: projectsPos.y,
+            left: projectsPos.x,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            width: 70,
+            cursor: "default",
+            userSelect: "none",
+          }}
+        >
+          <img
+            src={folderIcon}
+            alt=""
+            draggable={false}
+            onDragStart={(e) => e.preventDefault()}
+            style={{
+              width: 70,
+              height: "auto",
+              imageRendering: "pixelated",
+              marginBottom: 4,
+            }}
+          />
+          <span
+            style={{
+              color: "white",
+              fontSize: "11px",
+              fontFamily: "Tahoma, sans-serif",
+              fontWeight: "lighter",
+              textAlign: "center",
+              display: "inline-block",
+              whiteSpace: "normal",
+              width: "fit-content",
+              padding: projectsSelected ? "1px 2px" : "0px",
+              backgroundColor: projectsSelected ? "#0A246A" : "transparent",
+              borderRadius: 2,
+              textShadow: projectsSelected ? "none" : "1px 1px 2px #000",
+              letterSpacing: "1px",
+              lineHeight: "16px",
+            }}
+          >
+            Projects
+          </span>
+        </div>
+
+        {projectsWindowOpen && (
+          <Win2kFolderWindow
+            title="Projects"
+            onClose={() => setProjectsWindowOpen(false)}
+          />
+        )}
       </Flex>
 
       {/* Taskbar */}
