@@ -127,6 +127,23 @@ export function Win2kWordWindow({
 }: Props) {
   const [pos, setPos] = useState(initialPos);
   const [size, setSize] = useState(initialSize);
+  const [maximized, setMaximized] = useState(false);
+  const preMaximize = useRef({ pos: initialPos, size: initialSize });
+
+  const TASKBAR_H = 36;
+
+  const handleMaximize = () => {
+    if (maximized) {
+      setPos(preMaximize.current.pos);
+      setSize(preMaximize.current.size);
+      setMaximized(false);
+    } else {
+      preMaximize.current = { pos, size };
+      setPos({ x: 0, y: 0 });
+      setSize({ width: window.innerWidth, height: window.innerHeight - TASKBAR_H });
+      setMaximized(true);
+    }
+  };
 
   const isDragging = useRef(false);
   const isResizing = useRef(false);
@@ -161,12 +178,14 @@ export function Win2kWordWindow({
   }, []);
 
   const handleTitleBarMouseDown = (e: React.MouseEvent) => {
+    if (maximized) return;
     e.preventDefault();
     isDragging.current = true;
     dragOffset.current = { x: e.clientX - pos.x, y: e.clientY - pos.y };
   };
 
   const handleResizeMouseDown = (e: React.MouseEvent) => {
+    if (maximized) return;
     e.preventDefault();
     e.stopPropagation();
     isResizing.current = true;
@@ -237,18 +256,19 @@ export function Win2kWordWindow({
           >
             <span style={{ display: "block", width: 8, height: 2, backgroundColor: "#000", marginTop: 6 }} />
           </button>
-          <button style={titleBarBtnStyle} onMouseDown={(e) => e.stopPropagation()}>
-            <span
-              style={{
-                fontSize: "8px",
-                border: "1px solid #000",
-                width: 8,
-                height: 8,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            />
+          <button
+            style={titleBarBtnStyle}
+            onMouseDown={(e) => e.stopPropagation()}
+            onClick={handleMaximize}
+          >
+            {maximized ? (
+              <span style={{ position: "relative", display: "inline-block", width: 10, height: 10 }}>
+                <span style={{ position: "absolute", top: 2, left: 2, width: 7, height: 7, border: "1px solid #000", background: "#D4D0C8", display: "block" }} />
+                <span style={{ position: "absolute", top: 0, left: 0, width: 7, height: 7, border: "1px solid #000", borderTop: "2px solid #000", background: "#D4D0C8", display: "block" }} />
+              </span>
+            ) : (
+              <span style={{ display: "block", width: 8, height: 8, border: "1px solid #000", borderTop: "2px solid #000" }} />
+            )}
           </button>
           <button
             style={{ ...titleBarBtnStyle, marginLeft: 2 }}
