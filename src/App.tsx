@@ -170,6 +170,7 @@ export default function App() {
   // ---- Desktop mousedown (starts rubber-band) ----
 
   const handleDesktopMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.target !== e.currentTarget) return;
     setSelectedIcons(new Set());
     const rect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX - rect.left;
