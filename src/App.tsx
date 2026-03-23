@@ -6,6 +6,7 @@ import { Win2kWordWindow } from "./components/Win2kWordWindow";
 import { Win2kWelcomeDialog } from "./components/Win2kWelcomeDialog";
 import { Win2kNotepadWindow } from "./components/Win2kNotepadWindow";
 import { Win2kStartMenu } from "./components/Win2kStartMenu";
+import { Win2kRunDialog } from "./components/Win2kRunDialog";
 
 import ieLogo from "/ielogo.png";
 import emailLogo from "/emailicon.webp";
@@ -66,6 +67,17 @@ export default function App() {
 
   const [showWelcome, setShowWelcome] = useState(true);
   const [startMenuOpen, setStartMenuOpen] = useState(false);
+  const [runDialogOpen, setRunDialogOpen] = useState(false);
+
+  const handleRunCommand = (cmd: string) => {
+    if (cmd === "winword" || cmd === "winword.exe") {
+      setResumeWindowOpen(true); bringToFront("resume");
+    } else if (cmd === "explorer" || cmd === "explorer.exe") {
+      setProjectsWindowOpen(true); bringToFront("projects");
+    } else if (cmd === "notepad" || cmd === "notepad.exe") {
+      setAboutmeWindowOpen(true); bringToFront("aboutme");
+    }
+  };
 
   const [windowOrder, setWindowOrder] = useState<string[]>([]);
   const bringToFront = (id: string) =>
@@ -347,7 +359,11 @@ export default function App() {
         )}
 
         {startMenuOpen && (
-          <Win2kStartMenu onClose={() => setStartMenuOpen(false)} />
+          <Win2kStartMenu onClose={() => setStartMenuOpen(false)} onRun={() => setRunDialogOpen(true)} />
+        )}
+
+        {runDialogOpen && (
+          <Win2kRunDialog onClose={() => setRunDialogOpen(false)} onRun={handleRunCommand} />
         )}
       </Flex>
 

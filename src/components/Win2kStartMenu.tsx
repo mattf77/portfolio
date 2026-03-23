@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from "react";
 
 interface Props {
   onClose: () => void;
+  onRun: () => void;
 }
 
 interface MenuItem {
@@ -9,6 +10,7 @@ interface MenuItem {
   label: string;
   arrow?: boolean;
   separator?: false;
+  onClick?: () => void;
 }
 interface SeparatorItem {
   separator: true;
@@ -111,7 +113,7 @@ const ITEMS: Item[] = [
   },
 ];
 
-function MenuRow({ item }: { item: Item }) {
+function MenuRow({ item, onItemClick }: { item: Item; onItemClick?: () => void }) {
   const [hovered, setHovered] = React.useState(false);
 
   if ("separator" in item && item.separator) {
@@ -128,6 +130,7 @@ function MenuRow({ item }: { item: Item }) {
     <div
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
+      onClick={onItemClick ?? mi.onClick}
       style={{
         height: 28,
         display: "flex",
@@ -160,7 +163,7 @@ function MenuRow({ item }: { item: Item }) {
   );
 }
 
-export function Win2kStartMenu({ onClose }: Props) {
+export function Win2kStartMenu({ onClose, onRun }: Props) {
   const ref = useRef<HTMLDivElement>(null);
 
   // Close on click outside
@@ -232,9 +235,16 @@ export function Win2kStartMenu({ onClose }: Props) {
           paddingBottom: 4,
         }}
       >
-        {ITEMS.map((item, i) => (
-          <MenuRow key={i} item={item} />
-        ))}
+        {ITEMS.map((item, i) => {
+          const isRun = !("separator" in item) && (item as { label: string }).label === "Run...";
+          return (
+            <MenuRow
+              key={i}
+              item={item}
+              onItemClick={isRun ? () => { onClose(); onRun(); } : undefined}
+            />
+          );
+        })}
       </div>
     </div>
   );
