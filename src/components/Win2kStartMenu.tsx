@@ -6,6 +6,8 @@ interface Props {
   onOpenWord: () => void;
   onOpenExplorer: () => void;
   onOpenNotepad: () => void;
+  onOpenResume: () => void;
+  onOpenAboutMe: () => void;
 }
 
 interface MenuItem {
@@ -116,36 +118,34 @@ const ITEMS: Item[] = [
 ];
 
 const PROGRAMS = [
-  {
-    label: "Microsoft Word",
-    icon: "/word_icon_3.png",
-    key: "word",
-  },
-  {
-    label: "Windows Explorer",
-    icon: "/folder_icon.png",
-    key: "explorer",
-  },
-  {
-    label: "Notepad",
-    icon: "/notepad_icon_2.webp",
-    key: "notepad",
-  },
+  { label: "Microsoft Word",   icon: "/word_icon_3.png",      key: "word"     },
+  { label: "Windows Explorer", icon: "/folder_icon.png",      key: "explorer" },
+  { label: "Notepad",          icon: "/notepad_icon_2.webp",  key: "notepad"  },
 ];
 
-export function Win2kStartMenu({ onClose, onRun, onOpenWord, onOpenExplorer, onOpenNotepad }: Props) {
+const DOCUMENTS = [
+  { label: "Resume",      icon: "/word_icon_3.png",     key: "resume"  },
+  { label: "AboutMe.txt", icon: "/notepad_icon_2.webp", key: "aboutme" },
+];
+
+export function Win2kStartMenu({ onClose, onRun, onOpenWord, onOpenExplorer, onOpenNotepad, onOpenResume, onOpenAboutMe }: Props) {
   const ref = useRef<HTMLDivElement>(null);
   const programsRowRef = useRef<HTMLDivElement>(null);
+  const documentsRowRef = useRef<HTMLDivElement>(null);
   const submenuRef = useRef<HTMLDivElement>(null);
+  const docsSubmenuRef = useRef<HTMLDivElement>(null);
   const [programsOpen, setProgramsOpen] = useState(false);
+  const [documentsOpen, setDocumentsOpen] = useState(false);
   const [submenuPos, setSubmenuPos] = useState({ x: 0, y: 0 });
+  const [docsSubmenuPos, setDocsSubmenuPos] = useState({ x: 0, y: 0 });
 
   // Close on click outside
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       const insideMain = ref.current?.contains(e.target as Node);
       const insideSubmenu = submenuRef.current?.contains(e.target as Node);
-      if (!insideMain && !insideSubmenu) {
+      const insideDocsSubmenu = docsSubmenuRef.current?.contains(e.target as Node);
+      if (!insideMain && !insideSubmenu && !insideDocsSubmenu) {
         onClose();
       }
     };
@@ -162,6 +162,16 @@ export function Win2kStartMenu({ onClose, onRun, onOpenWord, onOpenExplorer, onO
       setSubmenuPos({ x: rect.right - 2, y: rect.top });
     }
     setProgramsOpen(true);
+    setDocumentsOpen(false);
+  };
+
+  const handleDocumentsEnter = () => {
+    if (documentsRowRef.current) {
+      const rect = documentsRowRef.current.getBoundingClientRect();
+      setDocsSubmenuPos({ x: rect.right - 2, y: rect.top });
+    }
+    setDocumentsOpen(true);
+    setProgramsOpen(false);
   };
 
   const handleProgramClick = (key: string) => {
@@ -169,6 +179,12 @@ export function Win2kStartMenu({ onClose, onRun, onOpenWord, onOpenExplorer, onO
     if (key === "word") onOpenWord();
     else if (key === "explorer") onOpenExplorer();
     else if (key === "notepad") onOpenNotepad();
+  };
+
+  const handleDocumentClick = (key: string) => {
+    onClose();
+    if (key === "resume") onOpenResume();
+    else if (key === "aboutme") onOpenAboutMe();
   };
 
   return (
@@ -238,15 +254,20 @@ export function Win2kStartMenu({ onClose, onRun, onOpenWord, onOpenExplorer, onO
 
             const mi = item as MenuItem;
             const isPrograms = mi.label === "Programs";
+            const isDocuments = mi.label === "Documents";
             const isRun = mi.label === "Run...";
 
             return (
               <MenuRow
                 key={i}
                 item={mi}
-                rowRef={isPrograms ? programsRowRef : undefined}
-                active={isPrograms && programsOpen}
-                onMouseEnter={isPrograms ? handleProgramsEnter : () => setProgramsOpen(false)}
+                rowRef={isPrograms ? programsRowRef : isDocuments ? documentsRowRef : undefined}
+                active={(isPrograms && programsOpen) || (isDocuments && documentsOpen)}
+                onMouseEnter={
+                  isPrograms ? handleProgramsEnter :
+                  isDocuments ? handleDocumentsEnter :
+                  () => { setProgramsOpen(false); setDocumentsOpen(false); }
+                }
                 onClick={isRun ? () => { onClose(); onRun(); } : undefined}
               />
             );
@@ -279,6 +300,36 @@ export function Win2kStartMenu({ onClose, onRun, onOpenWord, onOpenExplorer, onO
               label={prog.label}
               icon={prog.icon}
               onClick={() => handleProgramClick(prog.key)}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* ── Documents submenu ── */}
+      {documentsOpen && (
+        <div
+          ref={docsSubmenuRef}
+          onMouseLeave={() => setDocumentsOpen(false)}
+          style={{
+            position: "fixed",
+            top: docsSubmenuPos.y,
+            left: docsSubmenuPos.x,
+            zIndex: 10000,
+            backgroundColor: "#D4D0C8",
+            border: "2px solid #808080",
+            boxShadow: "inset 1px 1px 0 #fff, inset -1px -1px 0 #404040, 3px 3px 6px rgba(0,0,0,0.4)",
+            paddingTop: 2,
+            paddingBottom: 2,
+            userSelect: "none",
+            minWidth: 200,
+          }}
+        >
+          {DOCUMENTS.map((doc) => (
+            <ProgramRow
+              key={doc.key}
+              label={doc.label}
+              icon={doc.icon}
+              onClick={() => handleDocumentClick(doc.key)}
             />
           ))}
         </div>

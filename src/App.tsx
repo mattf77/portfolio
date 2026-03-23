@@ -365,6 +365,8 @@ export default function App() {
             onOpenWord={() => { setResumeWindowOpen(true); bringToFront("resume"); }}
             onOpenExplorer={() => { setProjectsWindowOpen(true); bringToFront("projects"); }}
             onOpenNotepad={() => { setAboutmeWindowOpen(true); bringToFront("aboutme"); }}
+            onOpenResume={() => { setResumeWindowOpen(true); bringToFront("resume"); }}
+            onOpenAboutMe={() => { setAboutmeWindowOpen(true); bringToFront("aboutme"); }}
           />
         )}
 
