@@ -3,6 +3,7 @@ import { Flex, Group, Button, Image } from "@mantine/core";
 import { Win2kClock } from "./components/Win2kClock";
 import { Win2kFolderWindow } from "./components/Win2kFolderWindow";
 import { Win2kWordWindow } from "./components/Win2kWordWindow";
+import { Win2kWelcomeDialog } from "./components/Win2kWelcomeDialog";
 
 import ieLogo from "/ielogo.png";
 import emailLogo from "/emailicon.webp";
@@ -52,6 +53,8 @@ export default function App() {
 
   const [resumeWindowOpen, setResumeWindowOpen] = useState(false);
   const [resumeWindowMinimized, setResumeWindowMinimized] = useState(false);
+
+  const [showWelcome, setShowWelcome] = useState(true);
 
   const [windowOrder, setWindowOrder] = useState<string[]>([]);
   const bringToFront = (id: string) =>
@@ -254,6 +257,10 @@ export default function App() {
             onClose={() => { setResumeWindowOpen(false); setResumeWindowMinimized(false); }}
             onMinimize={() => setResumeWindowMinimized(true)}
           />
+        )}
+
+        {showWelcome && (
+          <Win2kWelcomeDialog onClose={() => setShowWelcome(false)} />
         )}
       </Flex>
 
