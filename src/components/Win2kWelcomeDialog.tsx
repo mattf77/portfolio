@@ -13,6 +13,7 @@ export function Win2kWelcomeDialog({ onClose }: Props) {
       y: Math.round((window.innerHeight - h) / 2),
     };
   });
+  const [okPressed, setOkPressed] = useState(false);
   const isDragging = useRef(false);
   const dragOffset = useRef({ x: 0, y: 0 });
   const dialogRef = useRef<HTMLDivElement>(null);
@@ -148,7 +149,7 @@ export function Win2kWelcomeDialog({ onClose }: Props) {
               color: "#000",
             }}
           >
-            Welcome to Matthew's Portfolio. Here you can view Matthew's resume, Matthew's recent
+            Welcome to Matt's Portfolio. Here you can view Matt's resume, recent
             projects, as well as other information.
           </p>
         </div>
@@ -168,6 +169,9 @@ export function Win2kWelcomeDialog({ onClose }: Props) {
           <button
             onClick={onClose}
             autoFocus
+            onMouseDown={() => setOkPressed(true)}
+            onMouseUp={() => setOkPressed(false)}
+            onMouseLeave={() => setOkPressed(false)}
             style={{
               width: 75,
               height: 23,
@@ -176,7 +180,9 @@ export function Win2kWelcomeDialog({ onClose }: Props) {
               fontSize: "11px",
               cursor: "default",
               border: "none",
-              boxShadow: "inset 1px 1px 0 #fff, inset -1px -1px 0 #808080, inset 2px 2px 0 #dfdfdf, inset -2px -2px 0 #404040",
+              boxShadow: okPressed
+                ? "inset 1px 1px 0 #404040, inset -1px -1px 0 #dfdfdf, inset 2px 2px 0 #808080, inset -2px -2px 0 #fff"
+                : "inset 1px 1px 0 #fff, inset -1px -1px 0 #808080, inset 2px 2px 0 #dfdfdf, inset -2px -2px 0 #404040",
               // Focus ring — classic Win2k dotted outline inside button
               outline: "1px dotted #000",
               outlineOffset: "-4px",
