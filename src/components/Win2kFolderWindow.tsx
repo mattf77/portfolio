@@ -170,7 +170,7 @@ export function Win2kFolderWindow({
             onMouseDown={(e) => e.stopPropagation()}
             onClick={onMinimize}
           >
-            <span style={{ marginTop: 4 }}>_</span>
+            <span style={{ display: "block", width: 8, height: 2, backgroundColor: "#000", marginTop: 6 }} />
           </button>
           <button style={titleBarBtnStyle}>
             <span style={{ fontSize: "8px", border: "1px solid #000", width: 8, height: 8, display: "flex", alignItems: "center", justifyContent: "center" }} />
