@@ -10,8 +10,6 @@ import { Win2kRunDialog } from "./components/Win2kRunDialog";
 
 import ieLogo from "/ielogo.png";
 import emailLogo from "/emailicon.webp";
-import explorerLogo from "/explorericon.svg";
-import notepadLogo from "/notepadlogo.webp";
 import startIcon from "/starticon3.png";
 import windowsWallpaper from "/windowsxpultrawide.jpg"
 import folderIcon from "/folder_icon.png"
