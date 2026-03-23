@@ -4,6 +4,7 @@ import { Win2kClock } from "./components/Win2kClock";
 import { Win2kFolderWindow } from "./components/Win2kFolderWindow";
 import { Win2kWordWindow } from "./components/Win2kWordWindow";
 import { Win2kWelcomeDialog } from "./components/Win2kWelcomeDialog";
+import { Win2kNotepadWindow } from "./components/Win2kNotepadWindow";
 
 import ieLogo from "/ielogo.png";
 import emailLogo from "/emailicon.webp";
@@ -13,6 +14,7 @@ import startIcon from "/starticon3.png";
 import windowsWallpaper from "/windowsxpultrawide.jpg"
 import folderIcon from "/folder_icon.png"
 import wordIcon from "/word_icon_3.png"
+import notepadIcon from "/notepad_icon_2.webp"
 
 
 /* ------------------ WINDOWS 2000 DIVIDER ------------------ */
@@ -54,6 +56,13 @@ export default function App() {
   const [resumeWindowOpen, setResumeWindowOpen] = useState(false);
   const [resumeWindowMinimized, setResumeWindowMinimized] = useState(false);
 
+  const [aboutmePos, setAboutmePos] = useState({ x: 16, y: 212 });
+  const [aboutmeDragging, setAboutmeDragging] = useState(false);
+  const [aboutmeSelected, setAboutmeSelected] = useState(false);
+  const [aboutmeOffset, setAboutmeOffset] = useState({ x: 0, y: 0 });
+  const [aboutmeWindowOpen, setAboutmeWindowOpen] = useState(false);
+  const [aboutmeMinimized, setAboutmeMinimized] = useState(false);
+
   const [showWelcome, setShowWelcome] = useState(true);
 
   const [windowOrder, setWindowOrder] = useState<string[]>([]);
@@ -79,6 +88,15 @@ export default function App() {
     });
   };
 
+  const handleAboutmeMouseDown = (e: React.MouseEvent) => {
+    setAboutmeSelected(true);
+    setAboutmeDragging(true);
+    setAboutmeOffset({
+      x: e.clientX - aboutmePos.x,
+      y: e.clientY - aboutmePos.y,
+    });
+  };
+
   const handleMouseMove = (e: React.MouseEvent) => {
     if (resumeDragging) {
       setResumePos({
@@ -92,16 +110,24 @@ export default function App() {
         y: e.clientY - projectsOffset.y,
       });
     }
+    if (aboutmeDragging) {
+      setAboutmePos({
+        x: e.clientX - aboutmeOffset.x,
+        y: e.clientY - aboutmeOffset.y,
+      });
+    }
   };
 
   const handleMouseUp = () => {
     setResumeDragging(false);
     setProjectsDragging(false);
+    setAboutmeDragging(false);
   };
 
   const handleDesktopClick = () => {
     if (!resumeDragging) setResumeSelected(false);
     if (!projectsDragging) setProjectsSelected(false);
+    if (!aboutmeDragging) setAboutmeSelected(false);
   };
 
   return (
@@ -238,6 +264,51 @@ export default function App() {
           </span>
         </div>
 
+        {/* AboutMe Desktop Icon */}
+        <div
+          onMouseDown={(e) => { e.stopPropagation(); handleAboutmeMouseDown(e); }}
+          onClick={() => { setAboutmeWindowOpen(true); bringToFront("aboutme"); }}
+          style={{
+            position: "absolute",
+            top: aboutmePos.y,
+            left: aboutmePos.x,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            width: 70,
+            cursor: "default",
+            userSelect: "none",
+          }}
+        >
+          <img
+            src={notepadIcon}
+            alt=""
+            draggable={false}
+            onDragStart={(e) => e.preventDefault()}
+            style={{ width: 70, height: "auto", imageRendering: "pixelated", marginBottom: 4 }}
+          />
+          <span
+            style={{
+              color: "white",
+              fontSize: "11px",
+              fontFamily: "Tahoma, sans-serif",
+              fontWeight: "lighter",
+              textAlign: "center",
+              display: "inline-block",
+              whiteSpace: "normal",
+              width: "fit-content",
+              padding: aboutmeSelected ? "1px 2px" : "0px",
+              backgroundColor: aboutmeSelected ? "#0A246A" : "transparent",
+              borderRadius: 2,
+              textShadow: aboutmeSelected ? "none" : "1px 1px 2px #000",
+              letterSpacing: "1px",
+              lineHeight: "16px",
+            }}
+          >
+            AboutMe.txt
+          </span>
+        </div>
+
         {projectsWindowOpen && (
           <Win2kFolderWindow
             title="Projects"
@@ -256,6 +327,16 @@ export default function App() {
             onFocus={() => bringToFront("resume")}
             onClose={() => { setResumeWindowOpen(false); setResumeWindowMinimized(false); }}
             onMinimize={() => setResumeWindowMinimized(true)}
+          />
+        )}
+
+        {aboutmeWindowOpen && (
+          <Win2kNotepadWindow
+            minimized={aboutmeMinimized}
+            zIndex={zIndexOf("aboutme")}
+            onFocus={() => bringToFront("aboutme")}
+            onClose={() => { setAboutmeWindowOpen(false); setAboutmeMinimized(false); }}
+            onMinimize={() => setAboutmeMinimized(true)}
           />
         )}
 
@@ -375,6 +456,43 @@ export default function App() {
 
           {/* Open apps */}
           <Group gap="xs">
+            {aboutmeWindowOpen && (
+              <button
+                onClick={() => {
+                  if (aboutmeMinimized) { setAboutmeMinimized(false); bringToFront("aboutme"); }
+                  else { setAboutmeMinimized(true); }
+                }}
+                style={{
+                  height: 26,
+                  minWidth: 120,
+                  maxWidth: 160,
+                  backgroundColor: aboutmeMinimized ? "#245EDC" : "#1A3F8F",
+                  color: "#FFFFFF",
+                  fontFamily: "Tahoma, sans-serif",
+                  fontSize: "11px",
+                  padding: "0 8px 0 4px",
+                  boxSizing: "border-box",
+                  borderRadius: 0,
+                  border: "none",
+                  borderTop: aboutmeMinimized ? "1px solid #4A7BD0" : "1px solid #0A246A",
+                  borderLeft: aboutmeMinimized ? "1px solid #4A7BD0" : "1px solid #0A246A",
+                  borderRight: aboutmeMinimized ? "1px solid #0A246A" : "1px solid #4A7BD0",
+                  borderBottom: aboutmeMinimized ? "1px solid #0A246A" : "1px solid #4A7BD0",
+                  boxShadow: aboutmeMinimized
+                    ? "inset 1px 1px 0 rgba(255,255,255,0.1)"
+                    : "inset 1px 1px 0 #0A246A, inset -1px -1px 0 #4A7BD0",
+                  cursor: "default",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "flex-start",
+                  gap: 4,
+                }}
+              >
+                <img src={notepadIcon} alt="" draggable={false}
+                  style={{ height: 16, imageRendering: "pixelated", display: "block" }} />
+                AboutMe.txt - Notepad
+              </button>
+            )}
             {resumeWindowOpen && (
               <button
                 onClick={() => { setResumeWindowMinimized(!resumeWindowMinimized); bringToFront("resume"); }}
