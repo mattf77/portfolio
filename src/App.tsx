@@ -7,7 +7,7 @@ import emailLogo from "/emailicon.webp";
 import explorerLogo from "/explorericon.svg";
 import notepadLogo from "/notepadlogo.webp";
 import startIcon from "/starticon3.png";
-import windowsWallpaper from "/windowsbg.jpg"
+import windowsWallpaper from "/windowsxpultrawide.jpg"
 
 
 /* ------------------ WINDOWS 2000 DIVIDER ------------------ */
@@ -81,9 +81,11 @@ export default function App() {
           flex: 1,
           padding: "16px",
           backgroundImage: `url(${windowsWallpaper})`,
+              backgroundRepeat: "no-repeat",     // ← REQUIRED
+    backgroundPosition: "center",      // or "center -80px" for XP crop
+    backgroundSize: "cover",  
           position: "relative",
-          backgroundPosition: "center",
-          backgroundSize: "140%"
+
 
         }}
         onMouseMove={handleMouseMove}
@@ -154,6 +156,7 @@ export default function App() {
         align="center"
         style={{
           height: "32px",
+          minHeight: "3.5vh",
           backgroundColor: "#245EDC",
           padding: "0 3px",
           boxSizing: "border-box",
