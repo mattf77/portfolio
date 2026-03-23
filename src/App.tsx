@@ -71,11 +71,11 @@ export default function App() {
 
   const handleRunCommand = (cmd: string) => {
     if (cmd === "winword" || cmd === "winword.exe") {
-      setResumeWindowOpen(true); bringToFront("resume");
+      setResumeWindowOpen(true); setResumeWindowMinimized(false); bringToFront("resume");
     } else if (cmd === "explorer" || cmd === "explorer.exe") {
-      setProjectsWindowOpen(true); bringToFront("projects");
+      setProjectsWindowOpen(true); setProjectsMinimized(false); bringToFront("projects");
     } else if (cmd === "notepad" || cmd === "notepad.exe") {
-      setAboutmeWindowOpen(true); bringToFront("aboutme");
+      setAboutmeWindowOpen(true); setAboutmeMinimized(false); bringToFront("aboutme");
     }
   };
 
@@ -425,6 +425,7 @@ export default function App() {
                 height: 24,
                 imageRendering: "pixelated",
                 display: "block",
+                marginRight: 2,
               }}
             />
             Start
@@ -486,7 +487,7 @@ export default function App() {
           <Win2kDivider />
 
           {/* Open apps */}
-          <Group gap="xs">
+          <Group gap={2}>
             {aboutmeWindowOpen && (
               <button
                 onClick={() => {
