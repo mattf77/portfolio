@@ -47,6 +47,7 @@ export default function App() {
   const [projectsSelected, setProjectsSelected] = useState(false);
   const [projectsOffset, setProjectsOffset] = useState({ x: 0, y: 0 });
   const [projectsWindowOpen, setProjectsWindowOpen] = useState(false);
+  const [projectsMinimized, setProjectsMinimized] = useState(false);
 
   const handleResumeMouseDown = (e: React.MouseEvent) => {
     setResumeSelected(true);
@@ -227,7 +228,9 @@ export default function App() {
         {projectsWindowOpen && (
           <Win2kFolderWindow
             title="Projects"
-            onClose={() => setProjectsWindowOpen(false)}
+            minimized={projectsMinimized}
+            onClose={() => { setProjectsWindowOpen(false); setProjectsMinimized(false); }}
+            onMinimize={() => setProjectsMinimized(true)}
           />
         )}
       </Flex>
@@ -343,58 +346,50 @@ export default function App() {
 
           {/* Open apps */}
           <Group gap="xs">
-            {["Internet Explorer"].map((app) => (
-              <Button
-  key={app}
-  variant="default"
-  h={26}
-  styles={{
-  root: {
-    backgroundColor: "#316AC5",
-    color: "#FFFFFF",
-    fontFamily: "Tahoma, sans-serif",
-    fontSize: "12px",
-
-    padding: "2px 12px 2px 2px",   // ← asymmetric padding (TOP RIGHT BOTTOM LEFT)
-
-    boxSizing: "border-box",
-    borderRadius: 0,
-
-    borderTop: "1px solid #1A3F8F",
-    borderLeft: "1px solid #1A3F8F",
-    borderRight: "1px solid #4A7BD0",
-    borderBottom: "1px solid #4A7BD0",
-
-    boxShadow: `
-      inset 1px 1px 0 #1A3F8F,
-      inset -1px -1px 0 #DFDFDF
-    `,
-
-    cursor: "default",
-
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "flex-start",
-    gap: "2px",   // tight icon/text spacing
-  },
-}}
->
-  {/* IE icon inside the taskbar button */}
-  <img
-    src={ieLogo}
-    alt=""
-    draggable={false}
-    onDragStart={(e) => e.preventDefault()}
-    style={{
-      height: 20,
-      imageRendering: "pixelated",
-      display: "block",
-    }}
-  />
-
-  {app}
-</Button>
-            ))}
+            {projectsWindowOpen && (
+              <button
+                onClick={() => {
+                  if (projectsMinimized) {
+                    setProjectsMinimized(false);
+                  } else {
+                    setProjectsMinimized(true);
+                  }
+                }}
+                style={{
+                  height: 26,
+                  minWidth: 120,
+                  maxWidth: 160,
+                  backgroundColor: projectsMinimized ? "#245EDC" : "#1A3F8F",
+                  color: "#FFFFFF",
+                  fontFamily: "Tahoma, sans-serif",
+                  fontSize: "11px",
+                  padding: "0 8px 0 4px",
+                  boxSizing: "border-box",
+                  borderRadius: 0,
+                  border: "none",
+                  borderTop: projectsMinimized ? "1px solid #4A7BD0" : "1px solid #0A246A",
+                  borderLeft: projectsMinimized ? "1px solid #4A7BD0" : "1px solid #0A246A",
+                  borderRight: projectsMinimized ? "1px solid #0A246A" : "1px solid #4A7BD0",
+                  borderBottom: projectsMinimized ? "1px solid #0A246A" : "1px solid #4A7BD0",
+                  boxShadow: projectsMinimized
+                    ? "inset 1px 1px 0 rgba(255,255,255,0.1)"
+                    : "inset 1px 1px 0 #0A246A, inset -1px -1px 0 #4A7BD0",
+                  cursor: "default",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "flex-start",
+                  gap: 4,
+                }}
+              >
+                <img
+                  src={folderIcon}
+                  alt=""
+                  draggable={false}
+                  style={{ height: 16, imageRendering: "pixelated", display: "block" }}
+                />
+                Projects
+              </button>
+            )}
           </Group>
         </Flex>
 

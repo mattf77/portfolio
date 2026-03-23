@@ -3,6 +3,8 @@ import React, { useState, useRef, useEffect } from "react";
 interface Props {
   title: string;
   onClose: () => void;
+  onMinimize: () => void;
+  minimized: boolean;
   initialPos?: { x: number; y: number };
   initialSize?: { width: number; height: number };
   children?: React.ReactNode;
@@ -51,6 +53,8 @@ const menuItemStyle: React.CSSProperties = {
 export function Win2kFolderWindow({
   title,
   onClose,
+  onMinimize,
+  minimized,
   initialPos = { x: 120, y: 60 },
   initialSize = { width: 620, height: 440 },
   children,
@@ -110,8 +114,8 @@ export function Win2kFolderWindow({
         top: pos.y,
         left: pos.x,
         width: size.width,
-        height: size.height,
-        display: "flex",
+        height: minimized ? "auto" : size.height,
+        display: minimized ? "none" : "flex",
         flexDirection: "column",
         boxShadow: "inset 1px 1px 0 #fff, inset -1px -1px 0 #404040, 3px 3px 8px rgba(0,0,0,0.4)",
         border: "2px solid #808080",
@@ -161,7 +165,11 @@ export function Win2kFolderWindow({
 
         {/* Window controls */}
         <div style={{ display: "flex", gap: 2 }}>
-          <button style={titleBarBtnStyle}>
+          <button
+            style={titleBarBtnStyle}
+            onMouseDown={(e) => e.stopPropagation()}
+            onClick={onMinimize}
+          >
             <span style={{ marginTop: 4 }}>_</span>
           </button>
           <button style={titleBarBtnStyle}>
