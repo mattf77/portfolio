@@ -139,14 +139,18 @@ export function Win2kStartMenu({ onClose, onRun, onOpenWord, onOpenExplorer, onO
   const [submenuPos, setSubmenuPos] = useState({ x: 0, y: 0 });
   const [docsSubmenuPos, setDocsSubmenuPos] = useState({ x: 0, y: 0 });
 
-  // Close on click outside
+  // Keep a stable ref so the document listener doesn't need to re-register on every render
+  const onCloseRef = useRef(onClose);
+  useEffect(() => { onCloseRef.current = onClose; }, [onClose]);
+
+  // Close on click outside — empty deps keeps the listener registered for the full lifetime
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       const insideMain = ref.current?.contains(e.target as Node);
       const insideSubmenu = submenuRef.current?.contains(e.target as Node);
       const insideDocsSubmenu = docsSubmenuRef.current?.contains(e.target as Node);
       if (!insideMain && !insideSubmenu && !insideDocsSubmenu) {
-        onClose();
+        onCloseRef.current();
       }
     };
     const id = setTimeout(() => document.addEventListener("mousedown", handler), 0);
@@ -154,7 +158,7 @@ export function Win2kStartMenu({ onClose, onRun, onOpenWord, onOpenExplorer, onO
       clearTimeout(id);
       document.removeEventListener("mousedown", handler);
     };
-  }, [onClose]);
+  }, []);
 
   const handleProgramsEnter = () => {
     if (programsRowRef.current) {

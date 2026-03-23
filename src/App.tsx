@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Flex, Group, Button, Image } from "@mantine/core";
 import { Win2kClock } from "./components/Win2kClock";
 import { Win2kFolderWindow } from "./components/Win2kFolderWindow";
@@ -55,12 +55,16 @@ export default function App() {
 
   // Unified selection + drag
   const [selectedIcons, setSelectedIcons] = useState<Set<string>>(new Set());
-  const [draggingIcons, setDraggingIcons] = useState(false);
   const dragOffsetsRef = useRef<Record<string, { x: number; y: number }>>({});
 
   // Rubber-band selection
   const [rubberBand, setRubberBand] = useState<{ x1: number; y1: number; x2: number; y2: number } | null>(null);
   const isRubberBanding = useRef(false);
+  const desktopRef = useRef<HTMLDivElement>(null);
+
+  // Keep a ref copy of iconPositions so document-level handlers never read stale state
+  const iconPositionsRef = useRef(iconPositions);
+  useEffect(() => { iconPositionsRef.current = iconPositions; }, [iconPositions]);
 
   // Window open/minimized state
   const [projectsWindowOpen, setProjectsWindowOpen] = useState(false);
@@ -89,13 +93,65 @@ export default function App() {
     setWindowOrder((prev) => [...prev.filter((w) => w !== id), id]);
   const zIndexOf = (id: string) => 100 + windowOrder.indexOf(id);
 
+  // ---- Document-level mouse move + up (so release outside desktop always clears state) ----
+
+  useEffect(() => {
+    const onMouseMove = (e: MouseEvent) => {
+      if (Object.keys(dragOffsetsRef.current).length > 0) {
+        const updates: Record<string, { x: number; y: number }> = {};
+        Object.entries(dragOffsetsRef.current).forEach(([iconId, offset]) => {
+          updates[iconId] = { x: e.clientX - offset.x, y: e.clientY - offset.y };
+        });
+        setIconPositions((prev) => ({ ...prev, ...updates }));
+      }
+
+      if (isRubberBanding.current && desktopRef.current) {
+        const rect = desktopRef.current.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        setRubberBand((prev) => (prev ? { ...prev, x2: x, y2: y } : null));
+      }
+    };
+
+    const onMouseUp = () => {
+      dragOffsetsRef.current = {};
+
+      if (isRubberBanding.current) {
+        isRubberBanding.current = false;
+        setRubberBand((prev) => {
+          if (!prev) return null;
+          const minX = Math.min(prev.x1, prev.x2);
+          const maxX = Math.max(prev.x1, prev.x2);
+          const minY = Math.min(prev.y1, prev.y2);
+          const maxY = Math.max(prev.y1, prev.y2);
+
+          if (maxX - minX > 4 || maxY - minY > 4) {
+            const newSelected = new Set<string>();
+            Object.entries(iconPositionsRef.current).forEach(([iconId, pos]) => {
+              if (pos.x < maxX && pos.x + 48 > minX && pos.y < maxY && pos.y + 72 > minY) {
+                newSelected.add(iconId);
+              }
+            });
+            setSelectedIcons(newSelected);
+          }
+          return null;
+        });
+      }
+    };
+
+    document.addEventListener("mousemove", onMouseMove);
+    document.addEventListener("mouseup", onMouseUp);
+    return () => {
+      document.removeEventListener("mousemove", onMouseMove);
+      document.removeEventListener("mouseup", onMouseUp);
+    };
+  }, []);
+
   // ---- Icon mouse handlers ----
 
   const handleIconMouseDown = (e: React.MouseEvent, id: string) => {
     e.stopPropagation();
 
-    // Determine which icons to drag: if clicking an already-selected icon in a
-    // multi-selection, drag them all; otherwise select only this one.
     const iconsToSelect: Set<string> =
       selectedIcons.has(id) && selectedIcons.size > 1
         ? selectedIcons
@@ -111,10 +167,9 @@ export default function App() {
       };
     });
     dragOffsetsRef.current = offsets;
-    setDraggingIcons(true);
   };
 
-  // ---- Desktop mouse handlers ----
+  // ---- Desktop mousedown (starts rubber-band) ----
 
   const handleDesktopMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
     setSelectedIcons(new Set());
@@ -123,55 +178,6 @@ export default function App() {
     const y = e.clientY - rect.top;
     isRubberBanding.current = true;
     setRubberBand({ x1: x, y1: y, x2: x, y2: y });
-  };
-
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (draggingIcons && Object.keys(dragOffsetsRef.current).length > 0) {
-      const updates: Record<string, { x: number; y: number }> = {};
-      Object.entries(dragOffsetsRef.current).forEach(([iconId, offset]) => {
-        updates[iconId] = {
-          x: e.clientX - offset.x,
-          y: e.clientY - offset.y,
-        };
-      });
-      setIconPositions((prev) => ({ ...prev, ...updates }));
-    }
-
-    if (isRubberBanding.current) {
-      const rect = e.currentTarget.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-      setRubberBand((prev) => (prev ? { ...prev, x2: x, y2: y } : null));
-    }
-  };
-
-  const handleMouseUp = () => {
-    setDraggingIcons(false);
-    dragOffsetsRef.current = {};
-
-    if (isRubberBanding.current) {
-      isRubberBanding.current = false;
-      setRubberBand((prev) => {
-        if (!prev) return null;
-        const minX = Math.min(prev.x1, prev.x2);
-        const maxX = Math.max(prev.x1, prev.x2);
-        const minY = Math.min(prev.y1, prev.y2);
-        const maxY = Math.max(prev.y1, prev.y2);
-
-        // Only select if the rect has meaningful size (not just a click)
-        if (maxX - minX > 4 || maxY - minY > 4) {
-          const newSelected = new Set<string>();
-          Object.entries(iconPositions).forEach(([iconId, pos]) => {
-            // Icon bounding box: 48px wide, ~72px tall (icon + label)
-            if (pos.x < maxX && pos.x + 48 > minX && pos.y < maxY && pos.y + 72 > minY) {
-              newSelected.add(iconId);
-            }
-          });
-          setSelectedIcons(newSelected);
-        }
-        return null;
-      });
-    }
   };
 
   // During rubber-band, compute live icon hits so icons highlight as the rect overlaps them
@@ -203,7 +209,8 @@ export default function App() {
       }}
     >
       {/* Desktop area */}
-      <Flex
+      <div
+        ref={desktopRef}
         style={{
           flex: 1,
           padding: "16px",
@@ -213,8 +220,6 @@ export default function App() {
           backgroundSize: "cover",
           position: "relative",
         }}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
         onMouseDown={handleDesktopMouseDown}
       >
         {/* Desktop Icons */}
@@ -348,7 +353,7 @@ export default function App() {
         {runDialogOpen && (
           <Win2kRunDialog onClose={() => setRunDialogOpen(false)} onRun={handleRunCommand} />
         )}
-      </Flex>
+      </div>
 
       {/* Taskbar */}
       <Flex
