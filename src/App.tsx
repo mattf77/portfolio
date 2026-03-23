@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { Flex, Group, Button, Image } from "@mantine/core";
 import { Win2kClock } from "./components/Win2kClock";
 import { Win2kFolderWindow } from "./components/Win2kFolderWindow";
@@ -39,29 +39,34 @@ function Win2kDivider() {
 
 /* ------------------ APP ------------------ */
 
+const ICON_DEFS = [
+  { id: "resume",   src: wordIcon,    label: "Resume" },
+  { id: "projects", src: folderIcon,  label: "Projects" },
+  { id: "aboutme",  src: notepadIcon, label: "AboutMe.txt" },
+];
+
 export default function App() {
-  // Desktop icon positions
-  const [resumePos, setResumePos] = useState({ x: 16, y: 16 });
+  // Unified icon positions
+  const [iconPositions, setIconPositions] = useState<Record<string, { x: number; y: number }>>({
+    resume:   { x: 16, y: 16 },
+    projects: { x: 16, y: 114 },
+    aboutme:  { x: 16, y: 212 },
+  });
 
-  // Dragging + selection state
-  const [resumeDragging, setResumeDragging] = useState(false);
-  const [resumeSelected, setResumeSelected] = useState(false);
-  const [resumeOffset, setResumeOffset] = useState({ x: 0, y: 0 });
+  // Unified selection + drag
+  const [selectedIcons, setSelectedIcons] = useState<Set<string>>(new Set());
+  const [draggingIcons, setDraggingIcons] = useState(false);
+  const dragOffsetsRef = useRef<Record<string, { x: number; y: number }>>({});
 
-  const [projectsPos, setProjectsPos] = useState({ x: 16, y: 114 });
-  const [projectsDragging, setProjectsDragging] = useState(false);
-  const [projectsSelected, setProjectsSelected] = useState(false);
-  const [projectsOffset, setProjectsOffset] = useState({ x: 0, y: 0 });
+  // Rubber-band selection
+  const [rubberBand, setRubberBand] = useState<{ x1: number; y1: number; x2: number; y2: number } | null>(null);
+  const isRubberBanding = useRef(false);
+
+  // Window open/minimized state
   const [projectsWindowOpen, setProjectsWindowOpen] = useState(false);
   const [projectsMinimized, setProjectsMinimized] = useState(false);
-
   const [resumeWindowOpen, setResumeWindowOpen] = useState(false);
   const [resumeWindowMinimized, setResumeWindowMinimized] = useState(false);
-
-  const [aboutmePos, setAboutmePos] = useState({ x: 16, y: 212 });
-  const [aboutmeDragging, setAboutmeDragging] = useState(false);
-  const [aboutmeSelected, setAboutmeSelected] = useState(false);
-  const [aboutmeOffset, setAboutmeOffset] = useState({ x: 0, y: 0 });
   const [aboutmeWindowOpen, setAboutmeWindowOpen] = useState(false);
   const [aboutmeMinimized, setAboutmeMinimized] = useState(false);
 
@@ -84,64 +89,89 @@ export default function App() {
     setWindowOrder((prev) => [...prev.filter((w) => w !== id), id]);
   const zIndexOf = (id: string) => 100 + windowOrder.indexOf(id);
 
-  const handleResumeMouseDown = (e: React.MouseEvent) => {
-    setResumeSelected(true);
-    setResumeDragging(true);
-    setResumeOffset({
-      x: e.clientX - resumePos.x,
-      y: e.clientY - resumePos.y,
+  // ---- Icon mouse handlers ----
+
+  const handleIconMouseDown = (e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
+
+    // Determine which icons to drag: if clicking an already-selected icon in a
+    // multi-selection, drag them all; otherwise select only this one.
+    const iconsToSelect: Set<string> =
+      selectedIcons.has(id) && selectedIcons.size > 1
+        ? selectedIcons
+        : new Set([id]);
+
+    setSelectedIcons(iconsToSelect);
+
+    const offsets: Record<string, { x: number; y: number }> = {};
+    iconsToSelect.forEach((iconId) => {
+      offsets[iconId] = {
+        x: e.clientX - iconPositions[iconId].x,
+        y: e.clientY - iconPositions[iconId].y,
+      };
     });
+    dragOffsetsRef.current = offsets;
+    setDraggingIcons(true);
   };
 
-  const handleProjectsMouseDown = (e: React.MouseEvent) => {
-    setProjectsSelected(true);
-    setProjectsDragging(true);
-    setProjectsOffset({
-      x: e.clientX - projectsPos.x,
-      y: e.clientY - projectsPos.y,
-    });
+  // ---- Desktop mouse handlers ----
+
+  const handleDesktopMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    setSelectedIcons(new Set());
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    isRubberBanding.current = true;
+    setRubberBand({ x1: x, y1: y, x2: x, y2: y });
   };
 
-  const handleAboutmeMouseDown = (e: React.MouseEvent) => {
-    setAboutmeSelected(true);
-    setAboutmeDragging(true);
-    setAboutmeOffset({
-      x: e.clientX - aboutmePos.x,
-      y: e.clientY - aboutmePos.y,
-    });
-  };
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (resumeDragging) {
-      setResumePos({
-        x: e.clientX - resumeOffset.x,
-        y: e.clientY - resumeOffset.y,
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (draggingIcons && Object.keys(dragOffsetsRef.current).length > 0) {
+      const updates: Record<string, { x: number; y: number }> = {};
+      Object.entries(dragOffsetsRef.current).forEach(([iconId, offset]) => {
+        updates[iconId] = {
+          x: e.clientX - offset.x,
+          y: e.clientY - offset.y,
+        };
       });
+      setIconPositions((prev) => ({ ...prev, ...updates }));
     }
-    if (projectsDragging) {
-      setProjectsPos({
-        x: e.clientX - projectsOffset.x,
-        y: e.clientY - projectsOffset.y,
-      });
-    }
-    if (aboutmeDragging) {
-      setAboutmePos({
-        x: e.clientX - aboutmeOffset.x,
-        y: e.clientY - aboutmeOffset.y,
-      });
+
+    if (isRubberBanding.current) {
+      const rect = e.currentTarget.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      setRubberBand((prev) => (prev ? { ...prev, x2: x, y2: y } : null));
     }
   };
 
   const handleMouseUp = () => {
-    setResumeDragging(false);
-    setProjectsDragging(false);
-    setAboutmeDragging(false);
-  };
+    setDraggingIcons(false);
+    dragOffsetsRef.current = {};
 
-  const handleDesktopClick = () => {
-    if (!resumeDragging) setResumeSelected(false);
-    if (!projectsDragging) setProjectsSelected(false);
-    if (!aboutmeDragging) setAboutmeSelected(false);
+    if (isRubberBanding.current) {
+      isRubberBanding.current = false;
+      setRubberBand((prev) => {
+        if (!prev) return null;
+        const minX = Math.min(prev.x1, prev.x2);
+        const maxX = Math.max(prev.x1, prev.x2);
+        const minY = Math.min(prev.y1, prev.y2);
+        const maxY = Math.max(prev.y1, prev.y2);
+
+        // Only select if the rect has meaningful size (not just a click)
+        if (maxX - minX > 4 || maxY - minY > 4) {
+          const newSelected = new Set<string>();
+          Object.entries(iconPositions).forEach(([iconId, pos]) => {
+            // Icon bounding box: 48px wide, ~72px tall (icon + label)
+            if (pos.x < maxX && pos.x + 48 > minX && pos.y < maxY && pos.y + 72 > minY) {
+              newSelected.add(iconId);
+            }
+          });
+          setSelectedIcons(newSelected);
+        }
+        return null;
+      });
+    }
   };
 
   return (
@@ -161,167 +191,95 @@ export default function App() {
           flex: 1,
           padding: "16px",
           backgroundImage: `url(${windowsWallpaper})`,
-              backgroundRepeat: "no-repeat",     // ← REQUIRED
-    backgroundPosition: "center",      // or "center -80px" for XP crop
-    backgroundSize: "cover",  
+          backgroundRepeat: "no-repeat",
+          backgroundPosition: "center",
+          backgroundSize: "cover",
           position: "relative",
-
-
         }}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
-        onMouseDown={handleDesktopClick}
+        onMouseDown={handleDesktopMouseDown}
       >
-        {/* Resume Desktop Icon */}
-        <div
-          onMouseDown={(e) => {
-            e.stopPropagation();
-            handleResumeMouseDown(e);
-          }}
-          onDoubleClick={() => { setResumeWindowOpen(true); setResumeWindowMinimized(false); bringToFront("resume"); }}
-          style={{
-            position: "absolute",
-            top: resumePos.y,
-            left: resumePos.x,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            width: 48,
-            cursor: "default",
-            userSelect: "none",
-          }}
-        >
-          <img
-            src={wordIcon}
-            alt=""
-            draggable={false}
-            onDragStart={(e) => e.preventDefault()}
-            style={{
-              width: 48,
-              height: "auto",
-              imageRendering: "pixelated",
-              marginBottom: 4,
-            }}
-          />
-          <span
-            style={{
-              color: "white",
-              fontSize: "11px",
-              fontFamily: "Tahoma, sans-serif",
-              fontWeight: "lighter",
-              textAlign: "center",
-              display: "inline-block",
-              whiteSpace: "normal",
-              width: "fit-content",
-              padding: resumeSelected ? "1px 2px" : "0px",
-              backgroundColor: resumeSelected ? "#0A246A" : "transparent",
-              borderRadius: 2,
-              textShadow: resumeSelected ? "none" : "1px 1px 2px #000",
-              letterSpacing: "1px",
-              lineHeight: "16px",
-            }}
-          >
-            Resume
-          </span>
-        </div>
+        {/* Desktop Icons */}
+        {ICON_DEFS.map(({ id, src, label }) => {
+          const pos = iconPositions[id];
+          const isSelected = selectedIcons.has(id);
+          const onDoubleClick =
+            id === "resume"
+              ? () => { setResumeWindowOpen(true); setResumeWindowMinimized(false); bringToFront("resume"); }
+              : id === "projects"
+              ? () => { setProjectsWindowOpen(true); setProjectsMinimized(false); bringToFront("projects"); }
+              : () => { setAboutmeWindowOpen(true); setAboutmeMinimized(false); bringToFront("aboutme"); };
 
-        {/* Projects Desktop Icon */}
-        <div
-          onMouseDown={(e) => {
-            e.stopPropagation();
-            handleProjectsMouseDown(e);
-          }}
-          onDoubleClick={() => { setProjectsWindowOpen(true); setProjectsMinimized(false); bringToFront("projects"); }}
-          style={{
-            position: "absolute",
-            top: projectsPos.y,
-            left: projectsPos.x,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            width: 48,
-            cursor: "default",
-            userSelect: "none",
-          }}
-        >
-          <img
-            src={folderIcon}
-            alt=""
-            draggable={false}
-            onDragStart={(e) => e.preventDefault()}
-            style={{
-              width: 48,
-              height: "auto",
-              imageRendering: "pixelated",
-              marginBottom: 4,
-            }}
-          />
-          <span
-            style={{
-              color: "white",
-              fontSize: "11px",
-              fontFamily: "Tahoma, sans-serif",
-              fontWeight: "lighter",
-              textAlign: "center",
-              display: "inline-block",
-              whiteSpace: "normal",
-              width: "fit-content",
-              padding: projectsSelected ? "1px 2px" : "0px",
-              backgroundColor: projectsSelected ? "#0A246A" : "transparent",
-              borderRadius: 2,
-              textShadow: projectsSelected ? "none" : "1px 1px 2px #000",
-              letterSpacing: "1px",
-              lineHeight: "16px",
-            }}
-          >
-            Projects
-          </span>
-        </div>
+          return (
+            <div
+              key={id}
+              onMouseDown={(e) => handleIconMouseDown(e, id)}
+              onDoubleClick={onDoubleClick}
+              style={{
+                position: "absolute",
+                top: pos.y,
+                left: pos.x,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                width: 48,
+                cursor: "default",
+                userSelect: "none",
+              }}
+            >
+              <img
+                src={src}
+                alt=""
+                draggable={false}
+                onDragStart={(e) => e.preventDefault()}
+                style={{
+                  width: 48,
+                  height: "auto",
+                  imageRendering: "pixelated",
+                  marginBottom: 4,
+                }}
+              />
+              <span
+                style={{
+                  color: "white",
+                  fontSize: "11px",
+                  fontFamily: "Tahoma, sans-serif",
+                  fontWeight: "lighter",
+                  textAlign: "center",
+                  display: "inline-block",
+                  whiteSpace: "normal",
+                  width: "fit-content",
+                  padding: isSelected ? "1px 2px" : "0px",
+                  backgroundColor: isSelected ? "#0A246A" : "transparent",
+                  borderRadius: 2,
+                  textShadow: isSelected ? "none" : "1px 1px 2px #000",
+                  letterSpacing: "1px",
+                  lineHeight: "16px",
+                }}
+              >
+                {label}
+              </span>
+            </div>
+          );
+        })}
 
-        {/* AboutMe Desktop Icon */}
-        <div
-          onMouseDown={(e) => { e.stopPropagation(); handleAboutmeMouseDown(e); }}
-          onDoubleClick={() => { setAboutmeWindowOpen(true); setAboutmeMinimized(false); bringToFront("aboutme"); }}
-          style={{
-            position: "absolute",
-            top: aboutmePos.y,
-            left: aboutmePos.x,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            width: 48,
-            cursor: "default",
-            userSelect: "none",
-          }}
-        >
-          <img
-            src={notepadIcon}
-            alt=""
-            draggable={false}
-            onDragStart={(e) => e.preventDefault()}
-            style={{ width: 48, height: "auto", imageRendering: "pixelated", marginBottom: 4 }}
-          />
-          <span
+        {/* Rubber-band selection rectangle */}
+        {rubberBand && (
+          <div
             style={{
-              color: "white",
-              fontSize: "11px",
-              fontFamily: "Tahoma, sans-serif",
-              fontWeight: "lighter",
-              textAlign: "center",
-              display: "inline-block",
-              whiteSpace: "normal",
-              width: "fit-content",
-              padding: aboutmeSelected ? "1px 2px" : "0px",
-              backgroundColor: aboutmeSelected ? "#0A246A" : "transparent",
-              borderRadius: 2,
-              textShadow: aboutmeSelected ? "none" : "1px 1px 2px #000",
-              letterSpacing: "1px",
-              lineHeight: "16px",
+              position: "absolute",
+              left: Math.min(rubberBand.x1, rubberBand.x2),
+              top: Math.min(rubberBand.y1, rubberBand.y2),
+              width: Math.abs(rubberBand.x2 - rubberBand.x1),
+              height: Math.abs(rubberBand.y2 - rubberBand.y1),
+              border: "1px dotted #FFFFFF",
+              backgroundColor: "rgba(0, 78, 152, 0.25)",
+              pointerEvents: "none",
+              zIndex: 99,
             }}
-          >
-            AboutMe.txt
-          </span>
-        </div>
+          />
+        )}
 
         {projectsWindowOpen && (
           <Win2kFolderWindow
@@ -413,7 +371,7 @@ export default function App() {
               boxShadow:
                 "inset 1px 1px 0 #DFDFDF, inset -1px -1px 0 #404040",
               borderRadius: 0,
-              cursor: "default", 
+              cursor: "default",
               letterSpacing: '1px',
             }}
           >
@@ -435,54 +393,11 @@ export default function App() {
 
           {/* Quick Launch */}
           <Group gap={6}>
-  {/* 1st icon — Internet Explorer */}
-  <Image
-    src={ieLogo}
-    alt="IE"
-    style={{
-      width: 20,
-      height: 20,
-      imageRendering: "pixelated",
-      display: "block",
-    }}
-  />
-
-  {/* 2nd icon — Email */}
-  <Image
-    src={emailLogo}
-    alt="Email"
-    style={{
-      width: 20,
-      height: 20,
-      imageRendering: "pixelated",
-      display: "block",
-    }}
-  />
-
-  {/* 3rd icon — Explorer */}
-  <Image
-    src={explorerLogo}
-    alt="Explorer"
-    style={{
-      width: 20,
-      height: 20,
-      imageRendering: "pixelated",
-      display: "block",
-    }}
-  />
-
-  {/* 4th icon — Notepad */}
-  <Image
-    src={notepadLogo}
-    alt="Notepad"
-    style={{
-      width: 20,
-      height: 20,
-      imageRendering: "pixelated",
-      display: "block",
-    }}
-  />
-</Group>
+            <Image src={ieLogo} alt="IE" style={{ width: 20, height: 20, imageRendering: "pixelated", display: "block" }} />
+            <Image src={emailLogo} alt="Email" style={{ width: 20, height: 20, imageRendering: "pixelated", display: "block" }} />
+            <Image src={explorerLogo} alt="Explorer" style={{ width: 20, height: 20, imageRendering: "pixelated", display: "block" }} />
+            <Image src={notepadLogo} alt="Notepad" style={{ width: 20, height: 20, imageRendering: "pixelated", display: "block" }} />
+          </Group>
 
           <Win2kDivider />
 
@@ -495,33 +410,19 @@ export default function App() {
                   else { setAboutmeMinimized(true); }
                 }}
                 style={{
-                  height: 26,
-                  minWidth: 120,
-                  maxWidth: 160,
+                  height: 26, minWidth: 120, maxWidth: 160,
                   backgroundColor: aboutmeMinimized ? "#245EDC" : "#1A3F8F",
-                  color: "#FFFFFF",
-                  fontFamily: "Tahoma, sans-serif",
-                  fontSize: "11px",
-                  padding: "0 8px 0 4px",
-                  boxSizing: "border-box",
-                  borderRadius: 0,
-                  border: "none",
+                  color: "#FFFFFF", fontFamily: "Tahoma, sans-serif", fontSize: "11px",
+                  padding: "0 8px 0 4px", boxSizing: "border-box", borderRadius: 0, border: "none",
                   borderTop: aboutmeMinimized ? "1px solid #4A7BD0" : "1px solid #0A246A",
                   borderLeft: aboutmeMinimized ? "1px solid #4A7BD0" : "1px solid #0A246A",
                   borderRight: aboutmeMinimized ? "1px solid #0A246A" : "1px solid #4A7BD0",
                   borderBottom: aboutmeMinimized ? "1px solid #0A246A" : "1px solid #4A7BD0",
-                  boxShadow: aboutmeMinimized
-                    ? "inset 1px 1px 0 rgba(255,255,255,0.1)"
-                    : "inset 1px 1px 0 #0A246A, inset -1px -1px 0 #4A7BD0",
-                  cursor: "default",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "flex-start",
-                  gap: 4,
+                  boxShadow: aboutmeMinimized ? "inset 1px 1px 0 rgba(255,255,255,0.1)" : "inset 1px 1px 0 #0A246A, inset -1px -1px 0 #4A7BD0",
+                  cursor: "default", display: "flex", alignItems: "center", justifyContent: "flex-start", gap: 4,
                 }}
               >
-                <img src={notepadIcon} alt="" draggable={false}
-                  style={{ height: 16, imageRendering: "pixelated", display: "block" }} />
+                <img src={notepadIcon} alt="" draggable={false} style={{ height: 16, imageRendering: "pixelated", display: "block" }} />
                 AboutMe.txt - Notepad
               </button>
             )}
@@ -529,82 +430,42 @@ export default function App() {
               <button
                 onClick={() => { setResumeWindowMinimized(!resumeWindowMinimized); bringToFront("resume"); }}
                 style={{
-                  height: 26,
-                  minWidth: 120,
-                  maxWidth: 160,
+                  height: 26, minWidth: 120, maxWidth: 160,
                   backgroundColor: resumeWindowMinimized ? "#245EDC" : "#1A3F8F",
-                  color: "#FFFFFF",
-                  fontFamily: "Tahoma, sans-serif",
-                  fontSize: "11px",
-                  padding: "0 8px 0 4px",
-                  boxSizing: "border-box",
-                  borderRadius: 0,
-                  border: "none",
+                  color: "#FFFFFF", fontFamily: "Tahoma, sans-serif", fontSize: "11px",
+                  padding: "0 8px 0 4px", boxSizing: "border-box", borderRadius: 0, border: "none",
                   borderTop: resumeWindowMinimized ? "1px solid #4A7BD0" : "1px solid #0A246A",
                   borderLeft: resumeWindowMinimized ? "1px solid #4A7BD0" : "1px solid #0A246A",
                   borderRight: resumeWindowMinimized ? "1px solid #0A246A" : "1px solid #4A7BD0",
                   borderBottom: resumeWindowMinimized ? "1px solid #0A246A" : "1px solid #4A7BD0",
-                  boxShadow: resumeWindowMinimized
-                    ? "inset 1px 1px 0 rgba(255,255,255,0.1)"
-                    : "inset 1px 1px 0 #0A246A, inset -1px -1px 0 #4A7BD0",
-                  cursor: "default",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "flex-start",
-                  gap: 4,
+                  boxShadow: resumeWindowMinimized ? "inset 1px 1px 0 rgba(255,255,255,0.1)" : "inset 1px 1px 0 #0A246A, inset -1px -1px 0 #4A7BD0",
+                  cursor: "default", display: "flex", alignItems: "center", justifyContent: "flex-start", gap: 4,
                 }}
               >
-                <img
-                  src={wordIcon}
-                  alt=""
-                  draggable={false}
-                  style={{ height: 16, imageRendering: "pixelated", display: "block" }}
-                />
+                <img src={wordIcon} alt="" draggable={false} style={{ height: 16, imageRendering: "pixelated", display: "block" }} />
                 Resume - Microsoft Word
               </button>
             )}
             {projectsWindowOpen && (
               <button
                 onClick={() => {
-                  if (projectsMinimized) {
-                    setProjectsMinimized(false);
-                    bringToFront("projects");
-                  } else {
-                    setProjectsMinimized(true);
-                  }
+                  if (projectsMinimized) { setProjectsMinimized(false); bringToFront("projects"); }
+                  else { setProjectsMinimized(true); }
                 }}
                 style={{
-                  height: 26,
-                  minWidth: 120,
-                  maxWidth: 160,
+                  height: 26, minWidth: 120, maxWidth: 160,
                   backgroundColor: projectsMinimized ? "#245EDC" : "#1A3F8F",
-                  color: "#FFFFFF",
-                  fontFamily: "Tahoma, sans-serif",
-                  fontSize: "11px",
-                  padding: "0 8px 0 4px",
-                  boxSizing: "border-box",
-                  borderRadius: 0,
-                  border: "none",
+                  color: "#FFFFFF", fontFamily: "Tahoma, sans-serif", fontSize: "11px",
+                  padding: "0 8px 0 4px", boxSizing: "border-box", borderRadius: 0, border: "none",
                   borderTop: projectsMinimized ? "1px solid #4A7BD0" : "1px solid #0A246A",
                   borderLeft: projectsMinimized ? "1px solid #4A7BD0" : "1px solid #0A246A",
                   borderRight: projectsMinimized ? "1px solid #0A246A" : "1px solid #4A7BD0",
                   borderBottom: projectsMinimized ? "1px solid #0A246A" : "1px solid #4A7BD0",
-                  boxShadow: projectsMinimized
-                    ? "inset 1px 1px 0 rgba(255,255,255,0.1)"
-                    : "inset 1px 1px 0 #0A246A, inset -1px -1px 0 #4A7BD0",
-                  cursor: "default",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "flex-start",
-                  gap: 4,
+                  boxShadow: projectsMinimized ? "inset 1px 1px 0 rgba(255,255,255,0.1)" : "inset 1px 1px 0 #0A246A, inset -1px -1px 0 #4A7BD0",
+                  cursor: "default", display: "flex", alignItems: "center", justifyContent: "flex-start", gap: 4,
                 }}
               >
-                <img
-                  src={folderIcon}
-                  alt=""
-                  draggable={false}
-                  style={{ height: 16, imageRendering: "pixelated", display: "block" }}
-                />
+                <img src={folderIcon} alt="" draggable={false} style={{ height: 16, imageRendering: "pixelated", display: "block" }} />
                 Projects
               </button>
             )}
