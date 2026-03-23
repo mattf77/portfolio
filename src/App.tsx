@@ -178,7 +178,7 @@ export default function App() {
             e.stopPropagation();
             handleResumeMouseDown(e);
           }}
-          onDoubleClick={() => { setResumeWindowOpen(true); bringToFront("resume"); }}
+          onDoubleClick={() => { setResumeWindowOpen(true); setResumeWindowMinimized(false); bringToFront("resume"); }}
           style={{
             position: "absolute",
             top: resumePos.y,
@@ -231,7 +231,7 @@ export default function App() {
             e.stopPropagation();
             handleProjectsMouseDown(e);
           }}
-          onDoubleClick={() => { setProjectsWindowOpen(true); bringToFront("projects"); }}
+          onDoubleClick={() => { setProjectsWindowOpen(true); setProjectsMinimized(false); bringToFront("projects"); }}
           style={{
             position: "absolute",
             top: projectsPos.y,
@@ -281,7 +281,7 @@ export default function App() {
         {/* AboutMe Desktop Icon */}
         <div
           onMouseDown={(e) => { e.stopPropagation(); handleAboutmeMouseDown(e); }}
-          onDoubleClick={() => { setAboutmeWindowOpen(true); bringToFront("aboutme"); }}
+          onDoubleClick={() => { setAboutmeWindowOpen(true); setAboutmeMinimized(false); bringToFront("aboutme"); }}
           style={{
             position: "absolute",
             top: aboutmePos.y,
@@ -362,11 +362,11 @@ export default function App() {
           <Win2kStartMenu
             onClose={() => setStartMenuOpen(false)}
             onRun={() => setRunDialogOpen(true)}
-            onOpenWord={() => { setResumeWindowOpen(true); bringToFront("resume"); }}
-            onOpenExplorer={() => { setProjectsWindowOpen(true); bringToFront("projects"); }}
-            onOpenNotepad={() => { setAboutmeWindowOpen(true); bringToFront("aboutme"); }}
-            onOpenResume={() => { setResumeWindowOpen(true); bringToFront("resume"); }}
-            onOpenAboutMe={() => { setAboutmeWindowOpen(true); bringToFront("aboutme"); }}
+            onOpenWord={() => { setResumeWindowOpen(true); setResumeWindowMinimized(false); bringToFront("resume"); }}
+            onOpenExplorer={() => { setProjectsWindowOpen(true); setProjectsMinimized(false); bringToFront("projects"); }}
+            onOpenNotepad={() => { setAboutmeWindowOpen(true); setAboutmeMinimized(false); bringToFront("aboutme"); }}
+            onOpenResume={() => { setResumeWindowOpen(true); setResumeWindowMinimized(false); bringToFront("resume"); }}
+            onOpenAboutMe={() => { setAboutmeWindowOpen(true); setAboutmeMinimized(false); bringToFront("aboutme"); }}
           />
         )}
 
