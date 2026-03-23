@@ -151,8 +151,8 @@ export function Win2kWelcomeDialog({ onClose }: Props) {
               color: "#000",
             }}
           >
-            Welcome to Matthew's Portfolio. Here you can view Matthew's recent
-            projects, Matthew's resume, as well as other information.
+            Welcome to Matthew's Portfolio. Here you can view Matthew's resume, Matthew's recent
+            projects, as well as other information.
           </p>
         </div>
 
