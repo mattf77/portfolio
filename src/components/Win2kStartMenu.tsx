@@ -1,4 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
+import wordIcon from "/word_icon_3.png";
+import folderIcon from "/folder_icon.png";
+import notepadIcon from "/notepad_icon_2.webp";
 
 interface Props {
   onClose: () => void;
@@ -118,14 +121,14 @@ const ITEMS: Item[] = [
 ];
 
 const PROGRAMS = [
-  { label: "Microsoft Word",   icon: "/word_icon_3.png",      key: "word"     },
-  { label: "Windows Explorer", icon: "/folder_icon.png",      key: "explorer" },
-  { label: "Notepad",          icon: "/notepad_icon_2.webp",  key: "notepad"  },
+  { label: "Microsoft Word",   icon: wordIcon,    key: "word"     },
+  { label: "Windows Explorer", icon: folderIcon,  key: "explorer" },
+  { label: "Notepad",          icon: notepadIcon, key: "notepad"  },
 ];
 
 const DOCUMENTS = [
-  { label: "Resume",      icon: "/word_icon_3.png",     key: "resume"  },
-  { label: "AboutMe.txt", icon: "/notepad_icon_2.webp", key: "aboutme" },
+  { label: "Resume",      icon: wordIcon,    key: "resume"  },
+  { label: "AboutMe.txt", icon: notepadIcon, key: "aboutme" },
 ];
 
 export function Win2kStartMenu({ onClose, onRun, onOpenWord, onOpenExplorer, onOpenNotepad, onOpenResume, onOpenAboutMe }: Props) {
