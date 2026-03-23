@@ -186,7 +186,7 @@ export default function App() {
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
-            width: 70,
+            width: 48,
             cursor: "default",
             userSelect: "none",
           }}
@@ -197,7 +197,7 @@ export default function App() {
             draggable={false}
             onDragStart={(e) => e.preventDefault()}
             style={{
-              width: 70,
+              width: 48,
               height: "auto",
               imageRendering: "pixelated",
               marginBottom: 4,
@@ -239,7 +239,7 @@ export default function App() {
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
-            width: 70,
+            width: 48,
             cursor: "default",
             userSelect: "none",
           }}
@@ -250,7 +250,7 @@ export default function App() {
             draggable={false}
             onDragStart={(e) => e.preventDefault()}
             style={{
-              width: 70,
+              width: 48,
               height: "auto",
               imageRendering: "pixelated",
               marginBottom: 4,
@@ -289,7 +289,7 @@ export default function App() {
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
-            width: 70,
+            width: 48,
             cursor: "default",
             userSelect: "none",
           }}
@@ -299,7 +299,7 @@ export default function App() {
             alt=""
             draggable={false}
             onDragStart={(e) => e.preventDefault()}
-            style={{ width: 70, height: "auto", imageRendering: "pixelated", marginBottom: 4 }}
+            style={{ width: 48, height: "auto", imageRendering: "pixelated", marginBottom: 4 }}
           />
           <span
             style={{
