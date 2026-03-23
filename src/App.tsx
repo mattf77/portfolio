@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Flex, Group, Button, Image } from "@mantine/core";
 import { Win2kClock } from "./components/Win2kClock";
 import { Win2kFolderWindow } from "./components/Win2kFolderWindow";
+import { Win2kWordWindow } from "./components/Win2kWordWindow";
 
 import ieLogo from "/ielogo.png";
 import emailLogo from "/emailicon.webp";
@@ -48,6 +49,9 @@ export default function App() {
   const [projectsOffset, setProjectsOffset] = useState({ x: 0, y: 0 });
   const [projectsWindowOpen, setProjectsWindowOpen] = useState(false);
   const [projectsMinimized, setProjectsMinimized] = useState(false);
+
+  const [resumeWindowOpen, setResumeWindowOpen] = useState(false);
+  const [resumeWindowMinimized, setResumeWindowMinimized] = useState(false);
 
   const handleResumeMouseDown = (e: React.MouseEvent) => {
     setResumeSelected(true);
@@ -126,6 +130,7 @@ export default function App() {
             e.stopPropagation();
             handleResumeMouseDown(e);
           }}
+          onClick={() => setResumeWindowOpen(true)}
           style={{
             position: "absolute",
             top: resumePos.y,
@@ -231,6 +236,14 @@ export default function App() {
             minimized={projectsMinimized}
             onClose={() => { setProjectsWindowOpen(false); setProjectsMinimized(false); }}
             onMinimize={() => setProjectsMinimized(true)}
+          />
+        )}
+
+        {resumeWindowOpen && (
+          <Win2kWordWindow
+            minimized={resumeWindowMinimized}
+            onClose={() => { setResumeWindowOpen(false); setResumeWindowMinimized(false); }}
+            onMinimize={() => setResumeWindowMinimized(true)}
           />
         )}
       </Flex>
@@ -346,6 +359,44 @@ export default function App() {
 
           {/* Open apps */}
           <Group gap="xs">
+            {resumeWindowOpen && (
+              <button
+                onClick={() => setResumeWindowMinimized(!resumeWindowMinimized)}
+                style={{
+                  height: 26,
+                  minWidth: 120,
+                  maxWidth: 160,
+                  backgroundColor: resumeWindowMinimized ? "#245EDC" : "#1A3F8F",
+                  color: "#FFFFFF",
+                  fontFamily: "Tahoma, sans-serif",
+                  fontSize: "11px",
+                  padding: "0 8px 0 4px",
+                  boxSizing: "border-box",
+                  borderRadius: 0,
+                  border: "none",
+                  borderTop: resumeWindowMinimized ? "1px solid #4A7BD0" : "1px solid #0A246A",
+                  borderLeft: resumeWindowMinimized ? "1px solid #4A7BD0" : "1px solid #0A246A",
+                  borderRight: resumeWindowMinimized ? "1px solid #0A246A" : "1px solid #4A7BD0",
+                  borderBottom: resumeWindowMinimized ? "1px solid #0A246A" : "1px solid #4A7BD0",
+                  boxShadow: resumeWindowMinimized
+                    ? "inset 1px 1px 0 rgba(255,255,255,0.1)"
+                    : "inset 1px 1px 0 #0A246A, inset -1px -1px 0 #4A7BD0",
+                  cursor: "default",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "flex-start",
+                  gap: 4,
+                }}
+              >
+                <img
+                  src={wordIcon}
+                  alt=""
+                  draggable={false}
+                  style={{ height: 16, imageRendering: "pixelated", display: "block" }}
+                />
+                Resume - Microsoft Word
+              </button>
+            )}
             {projectsWindowOpen && (
               <button
                 onClick={() => {
