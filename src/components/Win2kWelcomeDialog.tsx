@@ -5,20 +5,17 @@ interface Props {
 }
 
 export function Win2kWelcomeDialog({ onClose }: Props) {
-  const [pos, setPos] = useState<{ x: number; y: number } | null>(null);
+  const [pos, setPos] = useState(() => {
+    const w = 420;
+    const h = 220;
+    return {
+      x: Math.round((window.innerWidth - w) / 2),
+      y: Math.round((window.innerHeight - h) / 2),
+    };
+  });
   const isDragging = useRef(false);
   const dragOffset = useRef({ x: 0, y: 0 });
   const dialogRef = useRef<HTMLDivElement>(null);
-
-  // Centre on mount
-  useEffect(() => {
-    const w = 420;
-    const h = 220;
-    setPos({
-      x: Math.round((window.innerWidth - w) / 2),
-      y: Math.round((window.innerHeight - h) / 2),
-    });
-  }, []);
 
   useEffect(() => {
     const onMouseMove = (e: MouseEvent) => {
