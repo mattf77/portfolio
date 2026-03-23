@@ -5,6 +5,7 @@ import { Win2kFolderWindow } from "./components/Win2kFolderWindow";
 import { Win2kWordWindow } from "./components/Win2kWordWindow";
 import { Win2kWelcomeDialog } from "./components/Win2kWelcomeDialog";
 import { Win2kNotepadWindow } from "./components/Win2kNotepadWindow";
+import { Win2kStartMenu } from "./components/Win2kStartMenu";
 
 import ieLogo from "/ielogo.png";
 import emailLogo from "/emailicon.webp";
@@ -64,6 +65,7 @@ export default function App() {
   const [aboutmeMinimized, setAboutmeMinimized] = useState(false);
 
   const [showWelcome, setShowWelcome] = useState(true);
+  const [startMenuOpen, setStartMenuOpen] = useState(false);
 
   const [windowOrder, setWindowOrder] = useState<string[]>([]);
   const bringToFront = (id: string) =>
@@ -343,6 +345,10 @@ export default function App() {
         {showWelcome && (
           <Win2kWelcomeDialog onClose={() => setShowWelcome(false)} />
         )}
+
+        {startMenuOpen && (
+          <Win2kStartMenu onClose={() => setStartMenuOpen(false)} />
+        )}
       </Flex>
 
       {/* Taskbar */}
@@ -369,6 +375,7 @@ export default function App() {
             variant="default"
             h={26}
             px={6}
+            onClick={() => setStartMenuOpen((o) => !o)}
             style={{
               display: "flex",
               color: "white",
