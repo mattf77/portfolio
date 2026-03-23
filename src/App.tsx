@@ -359,7 +359,13 @@ export default function App() {
         )}
 
         {startMenuOpen && (
-          <Win2kStartMenu onClose={() => setStartMenuOpen(false)} onRun={() => setRunDialogOpen(true)} />
+          <Win2kStartMenu
+            onClose={() => setStartMenuOpen(false)}
+            onRun={() => setRunDialogOpen(true)}
+            onOpenWord={() => { setResumeWindowOpen(true); bringToFront("resume"); }}
+            onOpenExplorer={() => { setProjectsWindowOpen(true); bringToFront("projects"); }}
+            onOpenNotepad={() => { setAboutmeWindowOpen(true); bringToFront("aboutme"); }}
+          />
         )}
 
         {runDialogOpen && (

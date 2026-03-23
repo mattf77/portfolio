@@ -1,8 +1,11 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 interface Props {
   onClose: () => void;
   onRun: () => void;
+  onOpenWord: () => void;
+  onOpenExplorer: () => void;
+  onOpenNotepad: () => void;
 }
 
 interface MenuItem {
@@ -10,7 +13,6 @@ interface MenuItem {
   label: string;
   arrow?: boolean;
   separator?: false;
-  onClick?: () => void;
 }
 interface SeparatorItem {
   separator: true;
@@ -113,67 +115,41 @@ const ITEMS: Item[] = [
   },
 ];
 
-function MenuRow({ item, onItemClick }: { item: Item; onItemClick?: () => void }) {
-  const [hovered, setHovered] = React.useState(false);
+const PROGRAMS = [
+  {
+    label: "Microsoft Word",
+    icon: "/word_icon_3.png",
+    key: "word",
+  },
+  {
+    label: "Windows Explorer",
+    icon: "/folder_icon.png",
+    key: "explorer",
+  },
+  {
+    label: "Notepad",
+    icon: "/notepad_icon_2.webp",
+    key: "notepad",
+  },
+];
 
-  if ("separator" in item && item.separator) {
-    return (
-      <div style={{ padding: "4px 6px 4px 36px" }}>
-        <div style={{ width: "100%", height: 1, backgroundColor: "#ACA899" }} />
-        <div style={{ width: "100%", height: 1, backgroundColor: "#fff" }} />
-      </div>
-    );
-  }
-
-  const mi = item as MenuItem;
-  return (
-    <div
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      onClick={onItemClick ?? mi.onClick}
-      style={{
-        height: 28,
-        display: "flex",
-        alignItems: "center",
-        paddingLeft: 4,
-        paddingRight: 8,
-        gap: 8,
-        backgroundColor: hovered ? "#0A246A" : "transparent",
-        cursor: "default",
-      }}
-    >
-      <span style={{ width: 24, height: 24, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-        {mi.icon}
-      </span>
-      <span
-        style={{
-          flex: 1,
-          fontSize: "12px",
-          fontFamily: "Tahoma, sans-serif",
-          color: hovered ? "#fff" : "#000",
-          whiteSpace: "nowrap",
-        }}
-      >
-        {mi.label}
-      </span>
-      {mi.arrow && (
-        <span style={{ fontSize: "10px", color: hovered ? "#fff" : "#000" }}>▶</span>
-      )}
-    </div>
-  );
-}
-
-export function Win2kStartMenu({ onClose, onRun }: Props) {
+export function Win2kStartMenu({ onClose, onRun, onOpenWord, onOpenExplorer, onOpenNotepad }: Props) {
   const ref = useRef<HTMLDivElement>(null);
+  const programsRowRef = useRef<HTMLDivElement>(null);
+  const submenuRef = useRef<HTMLDivElement>(null);
+  const [programsOpen, setProgramsOpen] = useState(false);
+  const [submenuPos, setSubmenuPos] = useState({ x: 0, y: 0 });
 
   // Close on click outside
   useEffect(() => {
     const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
+      if (
+        ref.current && !ref.current.contains(e.target as Node) &&
+        submenuRef.current && !submenuRef.current.contains(e.target as Node)
+      ) {
         onClose();
       }
     };
-    // Slight delay so the start-button click that opens it doesn't immediately close it
     const id = setTimeout(() => document.addEventListener("mousedown", handler), 0);
     return () => {
       clearTimeout(id);
@@ -181,71 +157,211 @@ export function Win2kStartMenu({ onClose, onRun }: Props) {
     };
   }, [onClose]);
 
+  const handleProgramsEnter = () => {
+    if (programsRowRef.current) {
+      const rect = programsRowRef.current.getBoundingClientRect();
+      setSubmenuPos({ x: rect.right - 2, y: rect.top });
+    }
+    setProgramsOpen(true);
+  };
+
+  const handleProgramClick = (key: string) => {
+    onClose();
+    if (key === "word") onOpenWord();
+    else if (key === "explorer") onOpenExplorer();
+    else if (key === "notepad") onOpenNotepad();
+  };
+
   return (
-    <div
-      ref={ref}
-      style={{
-        position: "fixed",
-        bottom: 36,          // sits just above the taskbar
-        left: 0,
-        display: "flex",
-        flexDirection: "row",
-        zIndex: 9999,
-        border: "2px solid #808080",
-        boxShadow: "inset 1px 1px 0 #fff, inset -1px -1px 0 #404040, 3px 3px 6px rgba(0,0,0,0.4)",
-        userSelect: "none",
-      }}
-    >
-      {/* ── Left banner ── */}
+    <>
       <div
+        ref={ref}
         style={{
-          width: 34,
-          background: "linear-gradient(to top, #1C3C8C, #0A1A4A)",
+          position: "fixed",
+          bottom: 36,
+          left: 0,
           display: "flex",
-          alignItems: "flex-end",
-          justifyContent: "center",
-          paddingBottom: 10,
-          flexShrink: 0,
+          flexDirection: "row",
+          zIndex: 9999,
+          border: "2px solid #808080",
+          boxShadow: "inset 1px 1px 0 #fff, inset -1px -1px 0 #404040, 3px 3px 6px rgba(0,0,0,0.4)",
+          userSelect: "none",
         }}
       >
-        <span
+        {/* ── Left banner ── */}
+        <div
           style={{
-            color: "rgba(255,255,255,0.7)",
-            fontSize: "14px",
-            fontFamily: "Tahoma, sans-serif",
-            fontWeight: "bold",
-            writingMode: "vertical-rl",
-            transform: "rotate(180deg)",
-            letterSpacing: "2px",
-            whiteSpace: "nowrap",
+            width: 34,
+            background: "linear-gradient(to top, #1C3C8C, #0A1A4A)",
+            display: "flex",
+            alignItems: "flex-end",
+            justifyContent: "center",
+            paddingBottom: 10,
+            flexShrink: 0,
           }}
         >
-          <span style={{ color: "#fff" }}>Windows</span>
-          {" "}
-          <span style={{ color: "rgba(255,255,255,0.5)", fontWeight: "normal", fontSize: "13px" }}>2000 Professional</span>
-        </span>
+          <span
+            style={{
+              color: "rgba(255,255,255,0.7)",
+              fontSize: "14px",
+              fontFamily: "Tahoma, sans-serif",
+              fontWeight: "bold",
+              writingMode: "vertical-rl",
+              transform: "rotate(180deg)",
+              letterSpacing: "2px",
+              whiteSpace: "nowrap",
+            }}
+          >
+            <span style={{ color: "#fff" }}>Windows</span>
+            {" "}
+            <span style={{ color: "rgba(255,255,255,0.5)", fontWeight: "normal", fontSize: "13px" }}>2000 Professional</span>
+          </span>
+        </div>
+
+        {/* ── Menu items ── */}
+        <div
+          style={{
+            backgroundColor: "#D4D0C8",
+            minWidth: 230,
+            paddingTop: 4,
+            paddingBottom: 4,
+          }}
+        >
+          {ITEMS.map((item, i) => {
+            if ("separator" in item && item.separator) {
+              return (
+                <div key={i} style={{ padding: "4px 6px 4px 36px" }}>
+                  <div style={{ width: "100%", height: 1, backgroundColor: "#ACA899" }} />
+                  <div style={{ width: "100%", height: 1, backgroundColor: "#fff" }} />
+                </div>
+              );
+            }
+
+            const mi = item as MenuItem;
+            const isPrograms = mi.label === "Programs";
+            const isRun = mi.label === "Run...";
+
+            return (
+              <MenuRow
+                key={i}
+                item={mi}
+                rowRef={isPrograms ? programsRowRef : undefined}
+                active={isPrograms && programsOpen}
+                onMouseEnter={isPrograms ? handleProgramsEnter : () => setProgramsOpen(false)}
+                onClick={isRun ? () => { onClose(); onRun(); } : undefined}
+              />
+            );
+          })}
+        </div>
       </div>
 
-      {/* ── Menu items ── */}
-      <div
-        style={{
-          backgroundColor: "#D4D0C8",
-          minWidth: 230,
-          paddingTop: 4,
-          paddingBottom: 4,
-        }}
-      >
-        {ITEMS.map((item, i) => {
-          const isRun = !("separator" in item) && (item as { label: string }).label === "Run...";
-          return (
-            <MenuRow
-              key={i}
-              item={item}
-              onItemClick={isRun ? () => { onClose(); onRun(); } : undefined}
+      {/* ── Programs submenu ── */}
+      {programsOpen && (
+        <div
+          ref={submenuRef}
+          onMouseLeave={() => setProgramsOpen(false)}
+          style={{
+            position: "fixed",
+            top: submenuPos.y,
+            left: submenuPos.x,
+            zIndex: 10000,
+            backgroundColor: "#D4D0C8",
+            border: "2px solid #808080",
+            boxShadow: "inset 1px 1px 0 #fff, inset -1px -1px 0 #404040, 3px 3px 6px rgba(0,0,0,0.4)",
+            paddingTop: 2,
+            paddingBottom: 2,
+            userSelect: "none",
+            minWidth: 200,
+          }}
+        >
+          {PROGRAMS.map((prog) => (
+            <ProgramRow
+              key={prog.key}
+              label={prog.label}
+              icon={prog.icon}
+              onClick={() => handleProgramClick(prog.key)}
             />
-          );
-        })}
-      </div>
+          ))}
+        </div>
+      )}
+    </>
+  );
+}
+
+function MenuRow({
+  item,
+  rowRef,
+  active,
+  onMouseEnter,
+  onClick,
+}: {
+  item: MenuItem;
+  rowRef?: React.RefObject<HTMLDivElement | null>;
+  active?: boolean;
+  onMouseEnter?: () => void;
+  onClick?: () => void;
+}) {
+  const [hovered, setHovered] = useState(false);
+  const highlighted = hovered || active;
+
+  return (
+    <div
+      ref={rowRef}
+      onMouseEnter={() => { setHovered(true); onMouseEnter?.(); }}
+      onMouseLeave={() => setHovered(false)}
+      onClick={onClick}
+      style={{
+        height: 28,
+        display: "flex",
+        alignItems: "center",
+        paddingLeft: 4,
+        paddingRight: 8,
+        gap: 8,
+        backgroundColor: highlighted ? "#0A246A" : "transparent",
+        cursor: "default",
+      }}
+    >
+      <span style={{ width: 24, height: 24, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+        {item.icon}
+      </span>
+      <span style={{ flex: 1, fontSize: "12px", fontFamily: "Tahoma, sans-serif", color: highlighted ? "#fff" : "#000", whiteSpace: "nowrap" }}>
+        {item.label}
+      </span>
+      {item.arrow && (
+        <span style={{ fontSize: "10px", color: highlighted ? "#fff" : "#000" }}>▶</span>
+      )}
+    </div>
+  );
+}
+
+function ProgramRow({ label, icon, onClick }: { label: string; icon: string; onClick: () => void }) {
+  const [hovered, setHovered] = useState(false);
+
+  return (
+    <div
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      onClick={onClick}
+      style={{
+        height: 28,
+        display: "flex",
+        alignItems: "center",
+        paddingLeft: 4,
+        paddingRight: 12,
+        gap: 8,
+        backgroundColor: hovered ? "#0A246A" : "transparent",
+        cursor: "default",
+      }}
+    >
+      <img
+        src={icon}
+        alt=""
+        draggable={false}
+        style={{ width: 20, height: 20, imageRendering: "pixelated", flexShrink: 0 }}
+      />
+      <span style={{ fontSize: "12px", fontFamily: "Tahoma, sans-serif", color: hovered ? "#fff" : "#000", whiteSpace: "nowrap" }}>
+        {label}
+      </span>
     </div>
   );
 }
