@@ -3,7 +3,9 @@ import React, { useState, useRef, useEffect } from "react";
 interface Props {
   onClose: () => void;
   onMinimize: () => void;
+  onFocus: () => void;
   minimized: boolean;
+  zIndex: number;
   initialPos?: { x: number; y: number };
   initialSize?: { width: number; height: number };
 }
@@ -117,7 +119,9 @@ function DropdownBox({
 export function Win2kWordWindow({
   onClose,
   onMinimize,
+  onFocus,
   minimized,
+  zIndex,
   initialPos = { x: 160, y: 50 },
   initialSize = { width: 680, height: 500 },
 }: Props) {
@@ -171,6 +175,7 @@ export function Win2kWordWindow({
 
   return (
     <div
+      onMouseDown={onFocus}
       style={{
         position: "fixed",
         top: pos.y,
@@ -181,7 +186,7 @@ export function Win2kWordWindow({
         flexDirection: "column",
         boxShadow: "inset 1px 1px 0 #fff, inset -1px -1px 0 #404040, 3px 3px 8px rgba(0,0,0,0.4)",
         border: "2px solid #808080",
-        zIndex: 100,
+        zIndex,
         userSelect: "none",
         fontFamily: "Tahoma, sans-serif",
         fontSize: "11px",

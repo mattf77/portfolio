@@ -53,6 +53,11 @@ export default function App() {
   const [resumeWindowOpen, setResumeWindowOpen] = useState(false);
   const [resumeWindowMinimized, setResumeWindowMinimized] = useState(false);
 
+  const [windowOrder, setWindowOrder] = useState<string[]>([]);
+  const bringToFront = (id: string) =>
+    setWindowOrder((prev) => [...prev.filter((w) => w !== id), id]);
+  const zIndexOf = (id: string) => 100 + windowOrder.indexOf(id);
+
   const handleResumeMouseDown = (e: React.MouseEvent) => {
     setResumeSelected(true);
     setResumeDragging(true);
@@ -130,7 +135,7 @@ export default function App() {
             e.stopPropagation();
             handleResumeMouseDown(e);
           }}
-          onClick={() => setResumeWindowOpen(true)}
+          onClick={() => { setResumeWindowOpen(true); bringToFront("resume"); }}
           style={{
             position: "absolute",
             top: resumePos.y,
@@ -183,7 +188,7 @@ export default function App() {
             e.stopPropagation();
             handleProjectsMouseDown(e);
           }}
-          onClick={() => setProjectsWindowOpen(true)}
+          onClick={() => { setProjectsWindowOpen(true); bringToFront("projects"); }}
           style={{
             position: "absolute",
             top: projectsPos.y,
@@ -234,6 +239,8 @@ export default function App() {
           <Win2kFolderWindow
             title="Projects"
             minimized={projectsMinimized}
+            zIndex={zIndexOf("projects")}
+            onFocus={() => bringToFront("projects")}
             onClose={() => { setProjectsWindowOpen(false); setProjectsMinimized(false); }}
             onMinimize={() => setProjectsMinimized(true)}
           />
@@ -242,6 +249,8 @@ export default function App() {
         {resumeWindowOpen && (
           <Win2kWordWindow
             minimized={resumeWindowMinimized}
+            zIndex={zIndexOf("resume")}
+            onFocus={() => bringToFront("resume")}
             onClose={() => { setResumeWindowOpen(false); setResumeWindowMinimized(false); }}
             onMinimize={() => setResumeWindowMinimized(true)}
           />
@@ -361,7 +370,7 @@ export default function App() {
           <Group gap="xs">
             {resumeWindowOpen && (
               <button
-                onClick={() => setResumeWindowMinimized(!resumeWindowMinimized)}
+                onClick={() => { setResumeWindowMinimized(!resumeWindowMinimized); bringToFront("resume"); }}
                 style={{
                   height: 26,
                   minWidth: 120,
@@ -402,6 +411,7 @@ export default function App() {
                 onClick={() => {
                   if (projectsMinimized) {
                     setProjectsMinimized(false);
+                    bringToFront("projects");
                   } else {
                     setProjectsMinimized(true);
                   }
